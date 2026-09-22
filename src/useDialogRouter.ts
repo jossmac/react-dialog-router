@@ -18,18 +18,12 @@ export type DialogRouterOptions<T extends ViewMap> = {
   escapeBehaviour?: EscBehaviour | ((snapshot: Snapshot<T>) => EscBehaviour);
 };
 
-export function useDialogRouter<T extends ViewMap>(
-  options: DialogRouterOptions<T>,
-) {
+export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<T>) {
   const { onDismiss } = options;
 
   const [router] = useState(() => new DialogMemoryRouter<T>(options.initial));
 
-  const snapshot = useSyncExternalStore(
-    router.subscribe,
-    router.getSnapshot,
-    router.getSnapshot,
-  );
+  const snapshot = useSyncExternalStore(router.subscribe, router.getSnapshot, router.getSnapshot);
 
   const canGoBack =
     typeof options.allowBack === 'function'
@@ -47,9 +41,7 @@ export function useDialogRouter<T extends ViewMap>(
       : (options.escapeBehaviour ?? (canGoBack ? 'back' : 'dismiss'));
 
   const navigate = useCallback(
-    <K extends keyof T>(
-      ...args: [...ViewArgs<T, K>, options?: NavigateOptions]
-    ) => {
+    <K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]) => {
       router.navigate(...args);
     },
     [router],

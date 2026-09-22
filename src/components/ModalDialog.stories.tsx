@@ -20,8 +20,8 @@ export const Default: Story = {
       <Button>Open dialog</Button>
       <ModalDialog title="Subscribe" isDismissable>
         <p className="modal-dialog-body">
-          Enter your information to subscribe and receive updates about new
-          features and announcements.
+          Enter your information to subscribe and receive updates about new features and
+          announcements.
         </p>
         <div className="modal-dialog-actions">
           <Button slot="close" variant="secondary">

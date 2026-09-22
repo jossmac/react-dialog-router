@@ -10,8 +10,8 @@ export default function App() {
           <p className="splash-brand">react-dialog-router</p>
           <h1 className="splash-headline">Nested dialogs, finally routable.</h1>
           <p className="splash-lede">
-            An experimental React library for stack-based modal navigation —
-            back, reset, and escape that behave like a router.
+            An experimental React library for stack-based modal navigation — back, reset, and escape
+            that behave like a router.
           </p>
           <div className="splash-actions">
             <a

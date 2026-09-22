@@ -14,16 +14,8 @@
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(
-      120% 80% at 12% 18%,
-      rgba(46, 139, 128, 0.22),
-      transparent 55%
-    ),
-    radial-gradient(
-      90% 70% at 88% 72%,
-      rgba(212, 145, 74, 0.14),
-      transparent 50%
-    ),
+    radial-gradient(120% 80% at 12% 18%, rgba(46, 139, 128, 0.22), transparent 55%),
+    radial-gradient(90% 70% at 88% 72%, rgba(212, 145, 74, 0.14), transparent 50%),
     linear-gradient(165deg, #0f1412 0%, #1a2220 48%, #121816 100%);
   animation: atmosphere-shift 14s ease-in-out infinite alternate;
 }

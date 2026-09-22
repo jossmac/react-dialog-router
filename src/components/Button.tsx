@@ -1,7 +1,5 @@
-import {
-  Button as RACButton,
-  type ButtonProps as RACButtonProps,
-} from 'react-aria-components/Button';
+import type { ButtonProps as RACButtonProps } from 'react-aria-components/Button';
+import { Button as RACButton } from 'react-aria-components/Button';
 import './Button.css';
 
 export type ButtonProps = RACButtonProps & {
