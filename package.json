@@ -16,9 +16,9 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "react": "^19.2.8",
-    "react-aria-components": "^1.21.1",
-    "react-dom": "^19.2.8"
+    "react": "catalog:",
+    "react-aria-components": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
@@ -26,8 +26,8 @@
     "@storybook/react-vite": "^10.6.0",
     "@types/babel__core": "^7.20.5",
     "@types/node": "^24.13.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^6.1.1",
     "babel-plugin-react-compiler": "^1.0.0",
     "oxfmt": "^0.70.0",

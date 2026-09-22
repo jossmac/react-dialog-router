@@ -14,19 +14,11 @@ type Views = {
 function RoutedModalExample() {
   const [isOpen, setOpen] = useState(false);
 
-  const {
-    current,
-    canGoBack,
-    dismissPolicy,
-    escapeAction,
-    navigate,
-    back,
-    reset,
-    requestDismiss,
-  } = useDialogRouter<Views>({
-    initial: { view: 'home', params: undefined },
-    onDismiss: () => setOpen(false),
-  });
+  const { current, canGoBack, dismissPolicy, escapeAction, navigate, back, reset, requestDismiss } =
+    useDialogRouter<Views>({
+      initial: { view: 'home', params: undefined },
+      onDismiss: () => setOpen(false),
+    });
 
   const open = useCallback(() => {
     reset();
@@ -73,16 +65,14 @@ function RoutedModalExample() {
               Settings
             </Heading>
             <p className="modal-dialog-body">
-              Choose an item to review. Escape dismisses; navigating deeper
-              changes Escape to go back.
+              Choose an item to review. Escape dismisses; navigating deeper changes Escape to go
+              back.
             </p>
             <div className="modal-dialog-actions">
               <Button variant="secondary" onPress={() => requestDismiss()}>
                 Close
               </Button>
-              <Button
-                onPress={() => navigate('details', { itemId: 'widget-42' })}
-              >
+              <Button onPress={() => navigate('details', { itemId: 'widget-42' })}>
                 View details
               </Button>
             </div>
