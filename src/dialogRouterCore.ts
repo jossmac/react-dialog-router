@@ -4,7 +4,7 @@ export type ViewMap = Record<string, unknown>;
 
 export type ViewState<T extends ViewMap, K extends keyof T = keyof T> = {
   view: K;
-  params: T[K];
+  params?: T[K];
 };
 
 export type DismissPolicy = 'allow' | 'block';

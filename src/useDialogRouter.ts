@@ -9,7 +9,6 @@ import type {
   NavigateOptions,
 } from './dialogRouterCore';
 import { DialogMemoryRouter, isNavigateOptions } from './dialogRouterCore';
-import { isPlainObject } from '@jossmac/lil-libs/object';
 
 const DEFAULT_VIEW_TRANSITIONS = {
   backwards: 'dialog-router-backwards',
@@ -35,7 +34,7 @@ export type DialogRouterOptions<T extends ViewMap> = {
    *
    * @default `snapshot.length > 1`
    */
-  allowBack?: boolean | ((snapshot: Snapshot<T>) => boolean);
+  allowBack?: (snapshot: Snapshot<T>) => boolean;
   /**
    * Controls whether `requestDismiss()` may close the dialog.
    * - `'allow'` — `requestDismiss()` calls `onDismiss`
@@ -46,7 +45,7 @@ export type DialogRouterOptions<T extends ViewMap> = {
    *
    * @default `'allow'`
    */
-  dismissPolicy?: DismissPolicy | ((snapshot: Snapshot<T>) => DismissPolicy);
+  dismissPolicy?: (snapshot: Snapshot<T>) => DismissPolicy;
   /**
    * How Escape should be handled by the dialog host.
    * - `'back'` — pop the stack
@@ -57,7 +56,7 @@ export type DialogRouterOptions<T extends ViewMap> = {
    *
    * @default `'back'` when `canGoBack`, otherwise `'dismiss'`
    */
-  escapeBehaviour?: EscBehaviour | ((snapshot: Snapshot<T>) => EscBehaviour);
+  escapeBehaviour?: (snapshot: Snapshot<T>) => EscBehaviour;
   /**
    * Wrap navigate/back/backTo in startTransition and tag them with transition
    * types for `<ViewTransition>`. Pass `false` to disable, or override the
@@ -66,20 +65,16 @@ export type DialogRouterOptions<T extends ViewMap> = {
    * @default
    * { forwards: 'forwards', backwards: 'backwards' }
    */
-  viewTransitions?: boolean | ViewTransitionTypes;
+  viewTransitions?: false | ViewTransitionTypes;
 };
 
 function resolveType(
-  viewTransitions: DialogRouterOptions<ViewMap>['viewTransitions'],
+  viewTransitions: false | ViewTransitionTypes = DEFAULT_VIEW_TRANSITIONS,
   direction: ViewTransitionKeys,
 ): string | null {
   if (viewTransitions === false) return null;
 
-  if (isPlainObject(viewTransitions)) {
-    return viewTransitions[direction];
-  }
-
-  return DEFAULT_VIEW_TRANSITIONS[direction];
+  return viewTransitions[direction];
 }
 
 export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<T>) {
@@ -105,20 +100,9 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
     });
   }, []);
 
-  const canGoBack =
-    typeof options.allowBack === 'function'
-      ? options.allowBack(snapshot)
-      : (options.allowBack ?? snapshot.length > 1);
-
-  const dismissPolicy =
-    typeof options.dismissPolicy === 'function'
-      ? options.dismissPolicy(snapshot)
-      : (options.dismissPolicy ?? 'allow');
-
-  const escapeAction =
-    typeof options.escapeBehaviour === 'function'
-      ? options.escapeBehaviour(snapshot)
-      : (options.escapeBehaviour ?? (canGoBack ? 'back' : 'dismiss'));
+  const canGoBack = options.allowBack?.(snapshot) ?? snapshot.length > 1;
+  const dismissPolicy = options.dismissPolicy?.(snapshot) ?? 'allow';
+  const escapeAction = options.escapeBehaviour?.(snapshot) ?? (canGoBack ? 'back' : 'dismiss');
 
   const navigate = useCallback(
     <K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]) => {
