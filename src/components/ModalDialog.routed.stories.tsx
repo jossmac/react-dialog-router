@@ -1,9 +1,23 @@
-import { useState, useCallback, useEffect } from 'react';
+import { ViewTransition, useCallback, useEffect, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Heading } from 'react-aria-components/Heading';
 import { ModalDialog } from './ModalDialog';
 import { Button } from './Button';
 import { useDialogRouter } from '../useDialogRouter';
+
+const meta = {
+  title: 'ModalDialog/Routed',
+  parameters: {
+    layout: 'centered',
+  },
+} satisfies Meta;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const WithRoutedViews: Story = {
+  render: () => <RoutedModalExample />,
+};
 
 type Views = {
   home: undefined;
@@ -14,11 +28,19 @@ type Views = {
 function RoutedModalExample() {
   const [isOpen, setOpen] = useState(false);
 
-  const { current, canGoBack, dismissPolicy, escapeAction, navigate, back, reset, requestDismiss } =
-    useDialogRouter<Views>({
-      initial: { view: 'home', params: undefined },
-      onDismiss: () => setOpen(false),
-    });
+  const {
+    current,
+    canGoBack,
+    dismissPolicy,
+    escapeAction,
+    navigate,
+    back,
+    reset,
+    requestDismiss,
+  } = useDialogRouter<Views>({
+    initial: { view: 'home', params: undefined },
+    onDismiss: () => setOpen(false),
+  });
 
   const open = useCallback(() => {
     reset();
@@ -52,7 +74,7 @@ function RoutedModalExample() {
 
   return (
     <>
-      <Button onPress={open}>Open routed dialog</Button>
+      <Button onPress={open}>Open</Button>
       <ModalDialog
         isOpen={isOpen}
         onOpenChange={handleOpenChange}
@@ -60,23 +82,25 @@ function RoutedModalExample() {
         isKeyboardDismissDisabled={escapeAction !== 'dismiss'}
       >
         {current.view === 'home' && (
-          <>
+          <DialogView>
             <Heading slot="title" className="modal-dialog-title">
               Settings
             </Heading>
             <p className="modal-dialog-body">
-              Choose an item to review. Escape dismisses; navigating deeper changes Escape to go
-              back.
+              Choose an item to review. Escape dismisses; navigating deeper
+              changes Escape to go back.
             </p>
             <div className="modal-dialog-actions">
               <Button variant="secondary" onPress={() => requestDismiss()}>
                 Close
               </Button>
-              <Button onPress={() => navigate('details', { itemId: 'widget-42' })}>
+              <Button
+                onPress={() => navigate('details', { itemId: 'widget-42' })}
+              >
                 View details
               </Button>
             </div>
-          </>
+          </DialogView>
         )}
         {current.view === 'details' && (
           <DetailsView
@@ -99,6 +123,14 @@ function RoutedModalExample() {
   );
 }
 
+function DialogView(props: { children: React.ReactNode }) {
+  return (
+    <ViewTransition name="dialog-view">
+      <div className="modal-dialog-view" {...props} />
+    </ViewTransition>
+  );
+}
+
 function DetailsView({
   itemId,
   canGoBack,
@@ -111,7 +143,7 @@ function DetailsView({
   onContinue: (itemId: string) => void;
 }) {
   return (
-    <>
+    <DialogView>
       <Heading slot="title" className="modal-dialog-title">
         Details
       </Heading>
@@ -126,7 +158,7 @@ function DetailsView({
         )}
         <Button onPress={() => onContinue(itemId)}>Continue</Button>
       </div>
-    </>
+    </DialogView>
   );
 }
 
@@ -142,7 +174,7 @@ function ConfirmView({
   onDone: () => void;
 }) {
   return (
-    <>
+    <DialogView>
       <Heading slot="title" className="modal-dialog-title">
         Confirm
       </Heading>
@@ -157,20 +189,6 @@ function ConfirmView({
         )}
         <Button onPress={onDone}>Done</Button>
       </div>
-    </>
+    </DialogView>
   );
 }
-
-const meta = {
-  title: 'ModalDialog/Routed',
-  parameters: {
-    layout: 'centered',
-  },
-} satisfies Meta;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-
-export const WithRoutedViews: Story = {
-  render: () => <RoutedModalExample />,
-};

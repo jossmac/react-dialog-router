@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore, useCallback } from 'react';
+import { useState, useCallback, startTransition, addTransitionType, useReducer } from 'react';
 import type {
   ViewMap,
   ViewState,
@@ -8,22 +8,102 @@ import type {
   ViewArgs,
   NavigateOptions,
 } from './dialogRouterCore';
-import { DialogMemoryRouter } from './dialogRouterCore';
+import { DialogMemoryRouter, isNavigateOptions } from './dialogRouterCore';
+import { isPlainObject } from '@jossmac/lil-libs/object';
 
-export type DialogRouterOptions<T extends ViewMap> = {
-  initial: ViewState<T>;
-  onDismiss?: () => void;
-  allowBack?: boolean | ((snapshot: Snapshot<T>) => boolean);
-  dismissPolicy?: DismissPolicy | ((snapshot: Snapshot<T>) => DismissPolicy);
-  escapeBehaviour?: EscBehaviour | ((snapshot: Snapshot<T>) => EscBehaviour);
+const DEFAULT_VIEW_TRANSITIONS = {
+  backwards: 'dialog-router-backwards',
+  forwards: 'dialog-router-forwards',
 };
 
+export type ViewTransitionTypes = typeof DEFAULT_VIEW_TRANSITIONS;
+export type ViewTransitionKeys = keyof ViewTransitionTypes;
+
+export type DialogRouterOptions<T extends ViewMap> = {
+  /**
+   * The root view state. Seeds the stack and is restored by `reset()` with no args.
+   */
+  initial: ViewState<T>;
+  /**
+   * Called when the dialog should close — via `dismiss()` or `requestDismiss()`
+   * when `dismissPolicy` is `'allow'`.
+   */
+  onDismiss?: () => void;
+  /**
+   * Whether the user can navigate back. A function is re-evaluated against the
+   * current snapshot on each render.
+   *
+   * @default `snapshot.length > 1`
+   */
+  allowBack?: boolean | ((snapshot: Snapshot<T>) => boolean);
+  /**
+   * Controls whether `requestDismiss()` may close the dialog.
+   * - `'allow'` — `requestDismiss()` calls `onDismiss`
+   * - `'block'` — `requestDismiss()` is a no-op
+   *
+   * Does not affect `dismiss()`, which always calls `onDismiss`.
+   * A function is re-evaluated against the current snapshot on each render.
+   *
+   * @default `'allow'`
+   */
+  dismissPolicy?: DismissPolicy | ((snapshot: Snapshot<T>) => DismissPolicy);
+  /**
+   * How Escape should be handled by the dialog host.
+   * - `'back'` — pop the stack
+   * - `'dismiss'` — close the dialog
+   * - `null` — ignore Escape
+   *
+   * A function is re-evaluated against the current snapshot on each render.
+   *
+   * @default `'back'` when `canGoBack`, otherwise `'dismiss'`
+   */
+  escapeBehaviour?: EscBehaviour | ((snapshot: Snapshot<T>) => EscBehaviour);
+  /**
+   * Wrap navigate/back/backTo in startTransition and tag them with transition
+   * types for `<ViewTransition>`. Pass `false` to disable, or override the
+   * type names.
+   *
+   * @default
+   * { forwards: 'forwards', backwards: 'backwards' }
+   */
+  viewTransitions?: boolean | ViewTransitionTypes;
+};
+
+function resolveType(
+  viewTransitions: DialogRouterOptions<ViewMap>['viewTransitions'],
+  direction: ViewTransitionKeys,
+): string | null {
+  if (viewTransitions === false) return null;
+
+  if (isPlainObject(viewTransitions)) {
+    return viewTransitions[direction];
+  }
+
+  return DEFAULT_VIEW_TRANSITIONS[direction];
+}
+
 export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<T>) {
-  const { onDismiss } = options;
+  const { onDismiss, viewTransitions } = options;
+  const forwardType = resolveType(viewTransitions, 'forwards');
+  const backwardType = resolveType(viewTransitions, 'backwards');
 
   const [router] = useState(() => new DialogMemoryRouter<T>(options.initial));
+  // React state (not useSyncExternalStore): ViewTransition only activates for
+  // updates scheduled inside startTransition. Store subscriptions are urgent
+  // and bypass that.
+  const [snapshot, setSnapshot] = useReducer(() => router.getSnapshot(), router.getSnapshot());
 
-  const snapshot = useSyncExternalStore(router.subscribe, router.getSnapshot, router.getSnapshot);
+  const commit = useCallback((action: () => void) => {
+    action();
+    setSnapshot();
+  }, []);
+
+  const commitTransition = useCallback((type: string, action: () => void) => {
+    startTransition(() => {
+      addTransitionType(type);
+      action();
+    });
+  }, []);
 
   const canGoBack =
     typeof options.allowBack === 'function'
@@ -42,27 +122,47 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
 
   const navigate = useCallback(
     <K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]) => {
-      router.navigate(...args);
+      const last = args[args.length - 1];
+      const navOpts = isNavigateOptions(last) ? last : undefined;
+      const skipTransition = forwardType == null || navOpts?.transition === false;
+
+      const run = () => commit(() => router.navigate(...args));
+      if (skipTransition) {
+        run();
+      } else {
+        commitTransition(forwardType, run);
+      }
     },
-    [router],
+    [router, forwardType, commit, commitTransition],
   );
 
   const back = useCallback(() => {
-    router.back();
-  }, [router]);
+    const run = () => commit(() => router.back());
+    if (backwardType == null) {
+      run();
+    } else {
+      commitTransition(backwardType, run);
+    }
+  }, [router, backwardType, commit, commitTransition]);
 
   const backTo = useCallback(
     (targetView: keyof T) => {
-      router.backTo(targetView);
+      const run = () => commit(() => router.backTo(targetView));
+      if (backwardType == null) {
+        run();
+      } else {
+        commitTransition(backwardType, run);
+      }
     },
-    [router],
+    [router, backwardType, commit, commitTransition],
   );
 
   const reset = useCallback(
     <K extends keyof T>(...args: ViewArgs<T, K> | []) => {
-      router.reset(...args);
+      // No navigation type — open/reset shouldn't slide like push/pop.
+      commit(() => router.reset(...args));
     },
-    [router],
+    [router, commit],
   );
 
   const dismiss = useCallback(() => {

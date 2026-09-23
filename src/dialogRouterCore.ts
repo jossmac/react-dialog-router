@@ -1,3 +1,5 @@
+import { isPlainObject } from '@jossmac/lil-libs/object';
+
 export type ViewMap = Record<string, unknown>;
 
 export type ViewState<T extends ViewMap, K extends keyof T = keyof T> = {
@@ -19,7 +21,28 @@ export type ViewArgs<T extends ViewMap, K extends keyof T> = T[K] extends undefi
   : [view: K, params: T[K]];
 
 export type NavigateOptions = {
+  /**
+   * When true, replace the current view in the stack instead of pushing a new one.
+   * @default false
+   */
   replace?: boolean;
+  /**
+   * When false, skip the view-transition wrapper for this call.
+   * @default true
+   */
+  transition?: boolean;
+};
+
+export function isNavigateOptions(value: unknown): value is NavigateOptions {
+  if (isPlainObject(value)) {
+    return 'replace' in value || 'transition' in value;
+  }
+  return false;
+}
+
+const DEFAULT_NAVIGATE_OPTIONS: NavigateOptions = {
+  replace: false,
+  transition: true,
 };
 
 export class DialogMemoryRouter<T extends ViewMap> {
@@ -41,7 +64,7 @@ export class DialogMemoryRouter<T extends ViewMap> {
     return () => this.listeners.delete(listener);
   };
 
-  // Must return a stable reference when unchanged — required by useSyncExternalStore.
+  // Stable reference when unchanged — callers may rely on referential equality.
   getSnapshot = (): Snapshot<T> => {
     return this.snapshot;
   };
@@ -55,12 +78,12 @@ export class DialogMemoryRouter<T extends ViewMap> {
   };
 
   navigate = <K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]) => {
-    const opts = args[args.length - 1] as NavigateOptions | undefined;
-    const isOptionsObj = opts && typeof opts === 'object' && 'replace' in opts;
+    const last = args[args.length - 1];
+    const hasOptions = isNavigateOptions(last);
 
-    const options = isOptionsObj ? opts : {};
+    const options = hasOptions ? last : DEFAULT_NAVIGATE_OPTIONS;
     const view = args[0] as K;
-    const params = isOptionsObj
+    const params = hasOptions
       ? args.length === 3
         ? args[1]
         : undefined

@@ -26,6 +26,9 @@ importers:
 
   .:
     dependencies:
+      '@jossmac/lil-libs':
+        specifier: ^3.2.0
+        version: 3.2.0
       react:
         specifier: 'catalog:'
         version: 19.3.0
@@ -346,6 +349,9 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  '@jossmac/lil-libs@3.2.0':
+    resolution: {integrity: sha512-Nu/GxpCEp1y0Pv68EQCldiif6PHvOerkNVFfx8ehNfetReA26jLsuU4Tvcwy8qt5vvJArJ/YWj6ZsXgEJm4caw==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -1988,6 +1994,8 @@ snapshots:
       vite: 8.3.0(@types/node@24.13.6)(esbuild@0.28.2)
     optionalDependencies:
       typescript: 6.0.3
+
+  '@jossmac/lil-libs@3.2.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

@@ -16,6 +16,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@jossmac/lil-libs": "^3.2.0",
     "react": "catalog:",
     "react-aria-components": "catalog:",
     "react-dom": "catalog:"
