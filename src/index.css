@@ -1,46 +1,29 @@
+@import './reset.css';
+
 :root {
-  --text: #a8b5af;
-  --text-h: #eef4f0;
-  --brand: #f3faf6;
-  --bg: #0f1412;
-  --border: rgba(232, 240, 236, 0.18);
-  --accent: #3dbaa4;
-  --accent-strong: #54d0ba;
-  --panel: rgba(28, 38, 34, 0.92);
-  --panel-border: rgba(232, 240, 236, 0.14);
+  --text: light-dark(#1d2220, #a8b5af);
+  --text-strong: light-dark(#0c1210, #eef4f0);
+  --brand: light-dark(#0f1412, #f3faf6);
+  --bg: light-dark(#f3faf6, #0f1412);
+  --border: light-dark(rgba(28, 38, 34, 0.14), rgba(232, 240, 236, 0.18));
+  --accent: light-dark(#54d0ba, #3dbaa4);
+  --accent-strong: light-dark(#3dbaa4, #54d0ba);
+  --panel: light-dark(rgba(232, 240, 236, 0.92), rgba(28, 38, 34, 0.92));
+  --panel-border: light-dark(rgba(28, 38, 34, 0.14), rgba(232, 240, 236, 0.14));
 
-  --display: 'Syne', 'Avenir Next', 'Segoe UI', sans-serif;
-  --sans: 'Public Sans', 'Segoe UI', sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  --font-display: 'Syne', 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-sans: 'Public Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
 
-  font: 17px/150% var(--sans);
-  letter-spacing: 0.01em;
-  color-scheme: dark;
-  color: var(--text);
   background: var(--bg);
+  color: var(--text);
   font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font: 17px/150% var(--font-sans);
+  letter-spacing: 0.01em;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  margin: 0;
-  min-height: 100%;
-}
-
-#root {
-  min-height: 100svh;
-}
-
-body {
-  margin: 0;
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
 }

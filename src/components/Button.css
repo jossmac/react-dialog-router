@@ -21,7 +21,7 @@
 }
 
 .react-aria-Button[data-variant='primary'] {
-  background: var(--text-h);
+  background: var(--text-strong);
   color: var(--bg);
 }
 
@@ -32,7 +32,7 @@
 .react-aria-Button[data-variant='secondary'] {
   background: transparent;
   border-color: var(--border);
-  color: var(--text-h);
+  color: var(--text-strong);
 }
 
 .react-aria-Button[data-variant='secondary'][data-hovered] {
