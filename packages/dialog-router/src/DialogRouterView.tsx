@@ -36,9 +36,10 @@ export function DialogRouterView(props: DialogRouterViewProps) {
   });
 
   useEffect(function focusOnNavigated() {
-    console.log('focusOnNavigated', snapshot.stack.length);
     if (localRef.current && snapshot.stack.length > 1) {
-      localRef.current.focus();
+      requestAnimationFrame(() => {
+        localRef.current?.focus({ preventScroll: true });
+      });
     }
   });
 

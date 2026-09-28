@@ -34,7 +34,7 @@ type Views = {
 
 function RoutedBaseExample() {
   return (
-    <DialogRouter initial={{ view: 'home' }}>
+    <DialogRouter<Views> initial={{ view: 'home' }}>
       {({ snapshot, escapeAction, navigate }) => (
         <Dialog.Root
           disablePointerDismissal={snapshot.current.view === 'confirm'}
@@ -59,10 +59,7 @@ function RoutedBaseExample() {
                   changes Escape to go back.
                 </p>
                 <div className="dialog-actions">
-                  <Dialog.Close
-                    className="button"
-                    data-variant="secondary"
-                  >
+                  <Dialog.Close className="button" data-variant="secondary">
                     Close
                   </Dialog.Close>
                   <button
@@ -123,13 +120,21 @@ function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
 }
 
 function ConfirmView() {
-  const { isBackAllowed, back, snapshot } = useRouteContext();
+  const { isBackAllowed, back, backTo, snapshot } = useRouteContext();
   return (
     <DialogView title="Confirm">
       <p className="dialog-body">
         Confirm changes for <code>{snapshot.current.params?.itemId}</code>?
       </p>
       <div className="dialog-actions">
+        <button
+          type="button"
+          className="button"
+          data-variant="secondary"
+          onClick={() => backTo('home')}
+        >
+          Back to start
+        </button>
         {isBackAllowed && (
           <button
             type="button"
@@ -140,9 +145,6 @@ function ConfirmView() {
             Back
           </button>
         )}
-        <Dialog.Close className="button" data-variant="primary">
-          Done
-        </Dialog.Close>
       </div>
     </DialogView>
   );

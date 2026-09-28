@@ -112,6 +112,15 @@ export class DialogMemoryRouter<T extends ViewMap> {
     }
   };
 
+  // Pops back to the first matching target view in the history stack
+  backTo = (targetView: keyof T) => {
+    const index = this.stack.findLastIndex((s) => s.view === targetView);
+    if (index !== -1 && index !== this.stack.length - 1) {
+      this.stack = this.stack.slice(0, index + 1);
+      this.notify();
+    }
+  };
+
   // Truncates back to the root or resets to a specified view state
   reset = <K extends keyof T>(...args: ViewArgs<T, K> | []) => {
     if (args.length === 0) {
@@ -121,15 +130,6 @@ export class DialogMemoryRouter<T extends ViewMap> {
       this.stack = [{ view, params: params as T[K] }];
     }
     this.notify();
-  };
-
-  // Pops back to the first matching target view in the history stack
-  backTo = (targetView: keyof T) => {
-    const index = this.stack.findLastIndex((s) => s.view === targetView);
-    if (index !== -1 && index !== this.stack.length - 1) {
-      this.stack = this.stack.slice(0, index + 1);
-      this.notify();
-    }
   };
 
   dismiss = () => {
