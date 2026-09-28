@@ -1,0 +1,45 @@
+::view-transition-group(dialog-view) {
+  animation-duration: 240ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
+  overflow-x: clip;
+  --slideDistance: 28%;
+
+  @media (prefers-reduced-motion: reduce) {
+    --slideDistance: 0;
+  }
+}
+
+:root:active-view-transition-type(dialog-router-backwards) {
+  &::view-transition-old(dialog-view) {
+    --slideX: var(--slideDistance);
+    animation-name: slide-out;
+  }
+  &::view-transition-new(dialog-view) {
+    --slideX: calc(-1 * var(--slideDistance));
+    animation-name: slide-in;
+  }
+}
+:root:active-view-transition-type(dialog-router-forwards) {
+  &::view-transition-old(dialog-view) {
+    --slideX: calc(-1 * var(--slideDistance));
+    animation-name: slide-out;
+  }
+  &::view-transition-new(dialog-view) {
+    --slideX: var(--slideDistance);
+    animation-name: slide-in;
+  }
+}
+
+@keyframes slide-out {
+  to {
+    opacity: 0;
+    transform: translateX(var(--slideX));
+  }
+}
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--slideX));
+  }
+}

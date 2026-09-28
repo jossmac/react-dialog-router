@@ -1,0 +1,56 @@
+@import './dialog.css';
+
+.react-aria-ModalOverlay {
+  align-items: center;
+  background: rgba(0 0 0 / 0.45);
+  box-sizing: border-box;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 16px;
+  position: fixed;
+  z-index: 100;
+}
+
+.react-aria-ModalOverlay[data-entering] {
+  animation: fade-in 240ms;
+}
+
+.react-aria-ModalOverlay[data-exiting] {
+  animation: fade-out 160ms ease-in;
+}
+
+.react-aria-Modal {
+  width: 100%;
+}
+
+.react-aria-Modal[data-entering] {
+  animation: zoom-in 280ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.react-aria-Dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  outline: none;
+  position: relative;
+  text-align: start;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    transform: scale(0.92);
+  }
+}

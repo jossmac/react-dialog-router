@@ -12,6 +12,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@base-ui/react": "catalog:",
     "@jossmac/dialog-router": "workspace:*",
     "@jossmac/lil-libs": "^3.2.0",
     "react": "catalog:",

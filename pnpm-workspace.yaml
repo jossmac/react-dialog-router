@@ -7,3 +7,4 @@ catalog:
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
   react-aria-components: 1.21.1
+  '@base-ui/react': 1.8.0

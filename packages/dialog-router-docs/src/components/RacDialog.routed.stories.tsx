@@ -12,10 +12,10 @@ import { ensure } from '@jossmac/lil-libs/assert';
 import { DialogTrigger } from 'react-aria-components';
 
 import { Button } from './Button';
-import { ModalDialog } from './ModalDialog';
+import { RacDialog } from './RacDialog';
 
 const meta = {
-  title: 'React Aria/ModalDialog',
+  title: 'React Aria/RacDialog',
   parameters: {
     layout: 'centered',
   },
@@ -28,7 +28,7 @@ export const WithRoutedViews: Story = {
   render: () => (
     <DialogTrigger>
       <Button>Open</Button>
-      <RoutedModalExample />
+      <RoutedRacExample />
     </DialogTrigger>
   ),
 };
@@ -39,21 +39,21 @@ type Views = {
   confirm: { itemId: string };
 };
 
-function RoutedModalExample() {
+function RoutedRacExample() {
   return (
     <DialogRouter<Views> initial={{ view: 'home' }}>
       {({ snapshot, escapeAction, navigate }) => (
-        <ModalDialog
+        <RacDialog
           isDismissable={snapshot.current.view !== 'confirm'}
           isKeyboardDismissDisabled={escapeAction !== 'dismiss'}
         >
           {snapshot.current.view === 'home' && (
             <DialogView title="Settings">
-              <p className="modal-dialog-body">
+              <p className="dialog-body">
                 Choose an item to review. Escape dismisses; navigating deeper
                 changes Escape to go back.
               </p>
-              <div className="modal-dialog-actions">
+              <div className="dialog-actions">
                 <Button variant="secondary">Close</Button>
                 <Button
                   onPress={() => navigate('details', { itemId: 'widget-42' })}
@@ -71,7 +71,7 @@ function RoutedModalExample() {
           {snapshot.current.view === 'confirm' && (
             <ConfirmView onDone={() => {}} />
           )}
-        </ModalDialog>
+        </RacDialog>
       )}
     </DialogRouter>
   );
@@ -83,10 +83,10 @@ function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
 
   return (
     <DialogView title="Details">
-      <p className="modal-dialog-body">
+      <p className="dialog-body">
         Reviewing <code>{itemId}</code>. You can go back or continue to confirm.
       </p>
-      <div className="modal-dialog-actions">
+      <div className="dialog-actions">
         {isBackAllowed && (
           <Button variant="secondary" onPress={back}>
             Back
@@ -102,10 +102,10 @@ function ConfirmView({ onDone }: { onDone: () => void }) {
   const { isBackAllowed, back, snapshot } = useRouteContext();
   return (
     <DialogView title="Confirm">
-      <p className="modal-dialog-body">
+      <p className="dialog-body">
         Confirm changes for <code>{snapshot.current.params?.itemId}</code>?
       </p>
-      <div className="modal-dialog-actions">
+      <div className="dialog-actions">
         {isBackAllowed && (
           <Button variant="secondary" onPress={back}>
             Back
@@ -120,8 +120,8 @@ function ConfirmView({ onDone }: { onDone: () => void }) {
 function DialogView(props: { children: React.ReactNode; title: string }) {
   return (
     <ViewTransition name="dialog-view">
-      <DialogRouterView className="modal-dialog-view" aria-label={props.title}>
-        <Heading slot="title" className="modal-dialog-title">
+      <DialogRouterView className="dialog-view" aria-label={props.title}>
+        <Heading slot="title" className="dialog-title">
           {props.title}
         </Heading>
         {props.children}

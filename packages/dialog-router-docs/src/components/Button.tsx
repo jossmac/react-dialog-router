@@ -1,6 +1,6 @@
 import type { ButtonProps as RACButtonProps } from 'react-aria-components/Button';
 import { Button as RACButton } from 'react-aria-components/Button';
-import './Button.css';
+import './button.css';
 
 export type ButtonProps = RACButtonProps & {
   variant?: 'primary' | 'secondary';
@@ -11,7 +11,7 @@ export function Button({ variant = 'primary', className, ...props }: ButtonProps
     <RACButton
       {...props}
       data-variant={variant}
-      className={['react-aria-Button', className].filter(Boolean).join(' ')}
+      className={['button', className].filter(Boolean).join(' ')}
     />
   );
 }

@@ -24,7 +24,7 @@ export default function App() {
             </a>
             <a
               className="splash-cta splash-cta-secondary"
-              href="https://github.com/jossmac/react-dialog-router/blob/main/packages/dialog-router-docs/src/components/ModalDialog.routed.stories.tsx"
+              href="https://github.com/jossmac/react-dialog-router/blob/main/packages/dialog-router-docs/src/components/RacDialog.routed.stories.tsx"
               target="_blank"
               rel="noreferrer"
             >
