@@ -13,7 +13,9 @@ export type Snapshot<T extends ViewMap> = {
   length: number;
 };
 
-export type ViewArgs<T extends ViewMap, K extends keyof T> = T[K] extends undefined | void
+export type ViewArgs<T extends ViewMap, K extends keyof T> = T[K] extends
+  | undefined
+  | void
   ? [view: K]
   : [view: K, params: T[K]];
 
@@ -45,7 +47,7 @@ const DEFAULT_NAVIGATE_OPTIONS: NavigateOptions = {
 export class DialogMemoryRouter<T extends ViewMap> {
   private stack: ViewState<T>[];
   private initial: ViewState<T>;
-  private listeners = new Set<() => void>();
+  private listeners = new Set<(snapshot: Snapshot<T>) => void>();
   private onDismiss?: () => void;
   private snapshot: Snapshot<T>;
 
@@ -56,9 +58,11 @@ export class DialogMemoryRouter<T extends ViewMap> {
     this.snapshot = this.createSnapshot();
   }
 
-  subscribe = (listener: () => void) => {
+  subscribe = (listener: (snapshot: Snapshot<T>) => void) => {
     this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
   };
 
   // Stable reference when unchanged — callers may rely on referential equality.
@@ -74,7 +78,9 @@ export class DialogMemoryRouter<T extends ViewMap> {
     };
   };
 
-  navigate = <K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]) => {
+  navigate = <K extends keyof T>(
+    ...args: [...ViewArgs<T, K>, options?: NavigateOptions]
+  ) => {
     const last = args[args.length - 1];
     const hasOptions = isNavigateOptions(last);
 
@@ -132,6 +138,6 @@ export class DialogMemoryRouter<T extends ViewMap> {
 
   private notify() {
     this.snapshot = this.createSnapshot();
-    this.listeners.forEach((listener) => listener());
+    this.listeners.forEach((listener) => listener(this.snapshot));
   }
 }

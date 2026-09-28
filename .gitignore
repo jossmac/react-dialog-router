@@ -40,6 +40,7 @@ jspm_packages
 # build output
 .next
 .nuxt
+.pnpm-store
 .vuepress/dist
 dist
 dist-ssr

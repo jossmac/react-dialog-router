@@ -2,12 +2,17 @@ import { ViewTransition, use } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Heading } from 'react-aria-components/Heading';
 
-import { ModalDialog } from './ModalDialog';
-import { Button } from './Button';
-import type { DialogRouterResult } from '../useDialogRouter';
-import { DialogTrigger } from 'react-aria-components';
+import type { DialogRouterResult } from '@jossmac/dialog-router';
+import {
+  DialogRouter,
+  DialogRouterContext,
+  DialogRouterView,
+} from '@jossmac/dialog-router';
 import { ensure } from '@jossmac/lil-libs/assert';
-import { DialogRouter, DialogRouterContext, DialogRouterView } from '../DialogRouter';
+import { DialogTrigger } from 'react-aria-components';
+
+import { Button } from './Button';
+import { ModalDialog } from './ModalDialog';
 
 const meta = {
   title: 'React Aria/ModalDialog',
@@ -37,29 +42,35 @@ type Views = {
 function RoutedModalExample() {
   return (
     <DialogRouter<Views> initial={{ view: 'home' }}>
-      {({ current, escapeAction, navigate }) => (
+      {({ snapshot, escapeAction, navigate }) => (
         <ModalDialog
-          isDismissable={current.view !== 'confirm'}
+          isDismissable={snapshot.current.view !== 'confirm'}
           isKeyboardDismissDisabled={escapeAction !== 'dismiss'}
         >
-          {current.view === 'home' && (
+          {snapshot.current.view === 'home' && (
             <DialogView title="Settings">
               <p className="modal-dialog-body">
-                Choose an item to review. Escape dismisses; navigating deeper changes Escape to go
-                back.
+                Choose an item to review. Escape dismisses; navigating deeper
+                changes Escape to go back.
               </p>
               <div className="modal-dialog-actions">
                 <Button variant="secondary">Close</Button>
-                <Button onPress={() => navigate('details', { itemId: 'widget-42' })}>
+                <Button
+                  onPress={() => navigate('details', { itemId: 'widget-42' })}
+                >
                   View details
                 </Button>
               </div>
             </DialogView>
           )}
-          {current.view === 'details' && (
-            <DetailsView onContinue={(itemId) => navigate('confirm', { itemId })} />
+          {snapshot.current.view === 'details' && (
+            <DetailsView
+              onContinue={(itemId) => navigate('confirm', { itemId })}
+            />
           )}
-          {current.view === 'confirm' && <ConfirmView onDone={() => {}} />}
+          {snapshot.current.view === 'confirm' && (
+            <ConfirmView onDone={() => {}} />
+          )}
         </ModalDialog>
       )}
     </DialogRouter>
@@ -67,8 +78,8 @@ function RoutedModalExample() {
 }
 
 function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
-  const { isBackAllowed, back, current } = useRouteContext();
-  const itemId = ensure(current.params?.itemId, 'itemId is required');
+  const { isBackAllowed, back, snapshot } = useRouteContext();
+  const itemId = ensure(snapshot.current.params?.itemId, 'itemId is required');
 
   return (
     <DialogView title="Details">
@@ -88,11 +99,11 @@ function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
 }
 
 function ConfirmView({ onDone }: { onDone: () => void }) {
-  const { isBackAllowed, back, current } = useRouteContext();
+  const { isBackAllowed, back, snapshot } = useRouteContext();
   return (
     <DialogView title="Confirm">
       <p className="modal-dialog-body">
-        Confirm changes for <code>{current.params?.itemId}</code>?
+        Confirm changes for <code>{snapshot.current.params?.itemId}</code>?
       </p>
       <div className="modal-dialog-actions">
         {isBackAllowed && (

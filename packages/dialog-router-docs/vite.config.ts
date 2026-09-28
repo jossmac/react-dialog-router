@@ -5,4 +5,11 @@ import { defineConfig } from 'vite';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
+  resolve: {
+    conditions: ['@jossmac/source'],
+    dedupe: ['react', 'react-dom'],
+  },
+  optimizeDeps: {
+    exclude: ['@jossmac/dialog-router'],
+  },
 });

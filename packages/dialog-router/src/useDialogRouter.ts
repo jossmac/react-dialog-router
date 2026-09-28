@@ -8,8 +8,14 @@ import {
   useReducer,
   useState,
 } from 'react';
-import type { NavigateOptions, Snapshot, ViewArgs, ViewMap, ViewState } from './dialogRouterCore';
-import { DialogMemoryRouter, isNavigateOptions } from './dialogRouterCore';
+import type {
+  NavigateOptions,
+  Snapshot,
+  ViewArgs,
+  ViewMap,
+  ViewState,
+} from './core';
+import { DialogMemoryRouter, isNavigateOptions } from './core';
 
 const DEFAULT_VIEW_TRANSITIONS = {
   backwards: 'dialog-router-backwards',
@@ -27,13 +33,6 @@ export type DialogRouterOptions<T extends ViewMap> = {
    */
   initial: ViewState<T>;
   /**
-   * Whether Escape handling is active. Pass the dialog's open state so a
-   * mounted-but-closed router does not steal Escape.
-   *
-   * @default false
-   */
-  // isActive?: boolean;
-  /**
    * Whether the user can navigate back. A function is re-evaluated against the
    * current snapshot on each render.
    *
@@ -41,9 +40,9 @@ export type DialogRouterOptions<T extends ViewMap> = {
    */
   allowBack?: (snapshot: Snapshot<T>) => boolean;
   /**
-   * How Escape should be handled.
-   * - `'back'` — pop the stack (handled by this hook when `isActive`)
-   * - `'dismiss'` — close the dialog (left to the dialog host)
+   * How pressing Escape should be handled.
+   * - `'back'` — pop the stack (handled by this hook)
+   * - `'dismiss'` — close the dialog (consumer responsibility)
    * - `null` — ignore Escape
    *
    * A function is re-evaluated against the current snapshot on each render.
@@ -71,18 +70,26 @@ function resolveType(
   return viewTransitions[direction];
 }
 
-export type DialogRouterResult<T extends ViewMap> = ReturnType<typeof useDialogRouter<T>>;
+export type DialogRouterResult<T extends ViewMap> = ReturnType<
+  typeof useDialogRouter<T>
+>;
 
-export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<T>) {
+export function useDialogRouter<T extends ViewMap>(
+  options: DialogRouterOptions<T>,
+) {
   const { viewTransitions } = options;
   const forwardType = resolveType(viewTransitions, 'forwards');
   const backwardType = resolveType(viewTransitions, 'backwards');
 
   const [router] = useState(() => new DialogMemoryRouter<T>(options.initial));
+
   // React state (not useSyncExternalStore): ViewTransition only activates for
   // updates scheduled inside startTransition. Store subscriptions are urgent
   // and bypass that.
-  const [snapshot, setSnapshot] = useReducer(() => router.getSnapshot(), router.getSnapshot());
+  const [snapshot, setSnapshot] = useReducer(
+    () => router.getSnapshot(),
+    router.getSnapshot(),
+  );
 
   const commit = useCallback((action: () => void) => {
     action();
@@ -97,13 +104,17 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
   }, []);
 
   const isBackAllowed = options.allowBack?.(snapshot) ?? snapshot.length > 1;
-  const escapeAction = options.escapeBehavior?.(snapshot) ?? (isBackAllowed ? 'back' : 'dismiss');
+  const escapeAction =
+    options.escapeBehavior?.(snapshot) ?? (isBackAllowed ? 'back' : 'dismiss');
 
   const navigate = useCallback(
-    <K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]) => {
+    <K extends keyof T>(
+      ...args: [...ViewArgs<T, K>, options?: NavigateOptions]
+    ) => {
       const last = args[args.length - 1];
       const navOpts = isNavigateOptions(last) ? last : undefined;
-      const skipTransition = forwardType == null || navOpts?.transition === false;
+      const skipTransition =
+        forwardType == null || navOpts?.transition === false;
 
       const run = () => commit(() => router.navigate(...args));
       if (skipTransition) {
@@ -144,6 +155,11 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
     [router, commit],
   );
 
+  const subscribe = useCallback(
+    (listener: (snapshot: Snapshot<T>) => void) => router.subscribe(listener),
+    [router],
+  );
+
   // Enact escapeAction === 'back'. Dismiss remains the dialog host's job.
   useEffect(() => {
     if (escapeAction !== 'back') return;
@@ -160,13 +176,13 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
   }, [escapeAction, back]);
 
   return {
-    current: snapshot.current,
-    stack: snapshot.stack,
+    snapshot,
     isBackAllowed,
     escapeAction,
     navigate,
     back,
     backTo,
     reset,
+    subscribe,
   };
 }

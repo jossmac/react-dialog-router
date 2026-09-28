@@ -1,0 +1,40 @@
+{
+  "name": "@jossmac/dialog-router",
+  "version": "0.0.0",
+  "description": "Stack-based modal dialog navigation for React",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@jossmac/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "dev": "vite build --watch",
+    "check:types": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@jossmac/lil-libs": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^6.1.1",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

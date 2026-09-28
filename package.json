@@ -1,40 +1,23 @@
 {
-  "name": "react-dialog-router",
+  "name": "dialog-router-monorepo",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "pnpm --filter @jossmac/dialog-router-docs dev",
+    "build": "pnpm --filter @jossmac/dialog-router build && pnpm --filter @jossmac/dialog-router-docs build",
     "check:lint": "oxlint",
-    "check:types": "tsc --noEmit",
+    "check:types": "pnpm -r run check:types",
     "check:format": "oxfmt --check",
     "check:all": "pnpm check:lint && pnpm check:types && pnpm check:format",
     "format": "oxfmt",
-    "preview": "vite preview",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
-  },
-  "dependencies": {
-    "@jossmac/lil-libs": "^3.2.0",
-    "react": "catalog:",
-    "react-aria-components": "catalog:",
-    "react-dom": "catalog:"
+    "preview": "pnpm --filter @jossmac/dialog-router-docs preview",
+    "storybook": "pnpm --filter @jossmac/dialog-router-docs storybook",
+    "build-storybook": "pnpm --filter @jossmac/dialog-router-docs build-storybook"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.7",
-    "@rolldown/plugin-babel": "^0.2.3",
-    "@storybook/react-vite": "^10.6.0",
-    "@types/babel__core": "^7.20.5",
-    "@types/node": "^24.13.3",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:",
-    "@vitejs/plugin-react": "^6.1.1",
-    "babel-plugin-react-compiler": "^1.0.0",
     "oxfmt": "^0.70.0",
     "oxlint": "^1.81.0",
-    "storybook": "^10.6.0",
-    "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "typescript": "~6.0.2"
   }
 }
