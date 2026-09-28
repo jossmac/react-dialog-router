@@ -7,9 +7,6 @@ export type ViewState<T extends ViewMap, K extends keyof T = keyof T> = {
   params?: T[K];
 };
 
-export type DismissPolicy = 'allow' | 'block';
-export type EscBehaviour = 'back' | 'dismiss' | null;
-
 export type Snapshot<T extends ViewMap> = {
   current: ViewState<T>;
   stack: ViewState<T>[];

@@ -36,10 +36,11 @@
 }
 
 .react-aria-Dialog {
-  outline: none;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  outline: none;
+  position: relative;
   text-align: start;
 }
 
@@ -52,6 +53,11 @@
   line-height: 1.25;
 }
 
+.modal-dialog-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
 .modal-dialog-body {
   margin: 0;
   font-size: 0.95rem;
@@ -72,6 +78,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 24px;
+  outline: 0;
 }
 
 @keyframes fade-in {

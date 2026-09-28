@@ -1,19 +1,22 @@
-import { useState, useCallback, startTransition, addTransitionType, useReducer } from 'react';
-import type {
-  ViewMap,
-  ViewState,
-  Snapshot,
-  EscBehaviour,
-  DismissPolicy,
-  ViewArgs,
-  NavigateOptions,
-} from './dialogRouterCore';
+'use client';
+
+import {
+  addTransitionType,
+  startTransition,
+  useCallback,
+  useEffect,
+  useReducer,
+  useState,
+} from 'react';
+import type { NavigateOptions, Snapshot, ViewArgs, ViewMap, ViewState } from './dialogRouterCore';
 import { DialogMemoryRouter, isNavigateOptions } from './dialogRouterCore';
 
 const DEFAULT_VIEW_TRANSITIONS = {
   backwards: 'dialog-router-backwards',
   forwards: 'dialog-router-forwards',
 };
+
+export type EscapeBehavior = 'back' | 'dismiss' | null;
 
 export type ViewTransitionTypes = typeof DEFAULT_VIEW_TRANSITIONS;
 export type ViewTransitionKeys = keyof ViewTransitionTypes;
@@ -24,10 +27,12 @@ export type DialogRouterOptions<T extends ViewMap> = {
    */
   initial: ViewState<T>;
   /**
-   * Called when the dialog should close — via `dismiss()` or `requestDismiss()`
-   * when `dismissPolicy` is `'allow'`.
+   * Whether Escape handling is active. Pass the dialog's open state so a
+   * mounted-but-closed router does not steal Escape.
+   *
+   * @default false
    */
-  onDismiss?: () => void;
+  // isActive?: boolean;
   /**
    * Whether the user can navigate back. A function is re-evaluated against the
    * current snapshot on each render.
@@ -36,27 +41,16 @@ export type DialogRouterOptions<T extends ViewMap> = {
    */
   allowBack?: (snapshot: Snapshot<T>) => boolean;
   /**
-   * Controls whether `requestDismiss()` may close the dialog.
-   * - `'allow'` — `requestDismiss()` calls `onDismiss`
-   * - `'block'` — `requestDismiss()` is a no-op
-   *
-   * Does not affect `dismiss()`, which always calls `onDismiss`.
-   * A function is re-evaluated against the current snapshot on each render.
-   *
-   * @default `'allow'`
-   */
-  dismissPolicy?: (snapshot: Snapshot<T>) => DismissPolicy;
-  /**
-   * How Escape should be handled by the dialog host.
-   * - `'back'` — pop the stack
-   * - `'dismiss'` — close the dialog
+   * How Escape should be handled.
+   * - `'back'` — pop the stack (handled by this hook when `isActive`)
+   * - `'dismiss'` — close the dialog (left to the dialog host)
    * - `null` — ignore Escape
    *
    * A function is re-evaluated against the current snapshot on each render.
    *
-   * @default `'back'` when `canGoBack`, otherwise `'dismiss'`
+   * @default `'back'` when `isBackAllowed`, otherwise `'dismiss'`
    */
-  escapeBehaviour?: (snapshot: Snapshot<T>) => EscBehaviour;
+  escapeBehavior?: (snapshot: Snapshot<T>) => EscapeBehavior;
   /**
    * Wrap navigate/back/backTo in startTransition and tag them with transition
    * types for `<ViewTransition>`. Pass `false` to disable, or override the
@@ -77,8 +71,10 @@ function resolveType(
   return viewTransitions[direction];
 }
 
+export type DialogRouterResult<T extends ViewMap> = ReturnType<typeof useDialogRouter<T>>;
+
 export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<T>) {
-  const { onDismiss, viewTransitions } = options;
+  const { viewTransitions } = options;
   const forwardType = resolveType(viewTransitions, 'forwards');
   const backwardType = resolveType(viewTransitions, 'backwards');
 
@@ -100,9 +96,8 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
     });
   }, []);
 
-  const canGoBack = options.allowBack?.(snapshot) ?? snapshot.length > 1;
-  const dismissPolicy = options.dismissPolicy?.(snapshot) ?? 'allow';
-  const escapeAction = options.escapeBehaviour?.(snapshot) ?? (canGoBack ? 'back' : 'dismiss');
+  const isBackAllowed = options.allowBack?.(snapshot) ?? snapshot.length > 1;
+  const escapeAction = options.escapeBehavior?.(snapshot) ?? (isBackAllowed ? 'back' : 'dismiss');
 
   const navigate = useCallback(
     <K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]) => {
@@ -149,28 +144,29 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
     [router, commit],
   );
 
-  const dismiss = useCallback(() => {
-    onDismiss?.();
-  }, [onDismiss]);
+  // Enact escapeAction === 'back'. Dismiss remains the dialog host's job.
+  useEffect(() => {
+    if (escapeAction !== 'back') return;
 
-  // Safe exit guard: checks dismissPolicy before calling dismiss()
-  const requestDismiss = useCallback(() => {
-    if (dismissPolicy === 'allow') {
-      onDismiss?.();
-    }
-  }, [dismissPolicy, onDismiss]);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      back();
+    };
+
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, [escapeAction, back]);
 
   return {
     current: snapshot.current,
     stack: snapshot.stack,
-    canGoBack,
-    dismissPolicy,
+    isBackAllowed,
     escapeAction,
     navigate,
     back,
     backTo,
     reset,
-    dismiss,
-    requestDismiss,
   };
 }
