@@ -39,7 +39,7 @@ export const Default: Story = {
   ),
 };
 
-export const AnimateViews: Story = {
+export const AnimateViewsVT: Story = {
   render: () => (
     <DialogRouter<Views> initial={[{ view: 'first' }]}>
       {(renderProps) => {
@@ -59,8 +59,8 @@ export const AnimateViews: Story = {
   ),
 };
 
-export const AnimateDiscreteViews: Story = {
-  render: function RenderAnimateDiscreteViews() {
+export const AnimateDiscreteViewsVT: Story = {
+  render: function RenderAnimateDiscreteViewsVT() {
     const rootId = useId();
 
     return (
@@ -71,31 +71,31 @@ export const AnimateDiscreteViews: Story = {
           const headingId = `${rootId}-${view.title}`;
 
           return (
-            <RacDialog
-              isOpen
-              style={{
-                width: 440,
-                paddingBlock: 16,
-                display: 'grid',
-                gap: 16,
-              }}
-            >
-              <ViewTransition>
-                <Heading
-                  slot="title"
-                  id={headingId}
-                  className="dialog-title"
-                  style={{ paddingInline: 16 }}
-                >
-                  {view.title}
-                </Heading>
-              </ViewTransition>
-              <ViewTransition name="dialog-view">
-                <DialogRouterView aria-labelledby={headingId} style={{ paddingInline: 16 }}>
-                  <Content {...renderProps} />
-                </DialogRouterView>
-              </ViewTransition>
-              <Actions {...renderProps} style={{ paddingInline: 16 }} />
+            <RacDialog isOpen>
+              <DialogRouterView
+                aria-labelledby={headingId}
+                style={{
+                  width: 440,
+                  paddingBlock: 16,
+                  display: 'grid',
+                  gap: 16,
+                }}
+              >
+                <ViewTransition>
+                  <Heading
+                    slot="title"
+                    id={headingId}
+                    className="dialog-title"
+                    style={{ paddingInline: 16 }}
+                  >
+                    {view.title}
+                  </Heading>
+                </ViewTransition>
+                <ViewTransition name="slide-x">
+                  <Content {...renderProps} style={{ paddingInline: 16 }} />
+                </ViewTransition>
+                <Actions {...renderProps} style={{ paddingInline: 16 }} />
+              </DialogRouterView>
             </RacDialog>
           );
         }}
@@ -145,15 +145,15 @@ function DialogView(props: {
     </DialogRouterView>
   );
   if (includeViewTransition) {
-    return <ViewTransition name="dialog-view">{content}</ViewTransition>;
+    return <ViewTransition name="slide-x">{content}</ViewTransition>;
   }
   return content;
 }
 
-function Content(props: DialogRouterState<Views>) {
-  const { current, escapeAction, isBackAllowed, stack } = props;
+function Content(props: DialogRouterState<Views> & StyleProps) {
+  const { current, escapeAction, isBackAllowed, stack, ...styleProps } = props;
   return (
-    <pre className="dialog-body">
+    <pre className="dialog-body" {...styleProps}>
       current: {current.view}
       <br />
       stack: [{stack.map((i) => i.view).join(', ')}]

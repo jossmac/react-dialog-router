@@ -132,7 +132,7 @@ function ConfirmView() {
 
 function DialogView(props: { children: React.ReactNode; title: string }) {
   return (
-    <ViewTransition name="dialog-view">
+    <ViewTransition name="slide-x">
       <DialogRouterView className="dialog-view" aria-label={props.title}>
         <Dialog.Title className="dialog-title">{props.title}</Dialog.Title>
         {props.children}

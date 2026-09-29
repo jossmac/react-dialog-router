@@ -1,4 +1,4 @@
-::view-transition-group(dialog-view) {
+::view-transition-group(slide-x) {
   animation-duration: 240ms;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-fill-mode: both;
@@ -11,21 +11,21 @@
 }
 
 :root:active-view-transition-type(dialog-router-backwards) {
-  &::view-transition-old(dialog-view) {
+  &::view-transition-old(slide-x) {
     --slideX: var(--slideDistance);
     animation-name: slide-out;
   }
-  &::view-transition-new(dialog-view) {
+  &::view-transition-new(slide-x) {
     --slideX: calc(-1 * var(--slideDistance));
     animation-name: slide-in;
   }
 }
 :root:active-view-transition-type(dialog-router-forwards) {
-  &::view-transition-old(dialog-view) {
+  &::view-transition-old(slide-x) {
     --slideX: calc(-1 * var(--slideDistance));
     animation-name: slide-out;
   }
-  &::view-transition-new(dialog-view) {
+  &::view-transition-new(slide-x) {
     --slideX: var(--slideDistance);
     animation-name: slide-in;
   }

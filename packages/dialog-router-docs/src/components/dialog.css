@@ -9,7 +9,7 @@
   max-height: min(90dvh, 640px);
   max-width: min(440px, 100%);
   outline: 1px solid var(--border);
-  overflow: auto;
+  /* overflow: auto; */
 }
 
 .dialog-title {
