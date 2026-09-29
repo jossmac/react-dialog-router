@@ -22,38 +22,39 @@ const DEFAULT_VIEW_TRANSITIONS = {
   forwards: 'dialog-router-forwards',
 };
 
-export type EscapeBehavior = 'back' | 'dismiss' | null;
+export type EscapeKeyBehavior = 'back' | 'dismiss' | null;
 
 export type ViewTransitionTypes = typeof DEFAULT_VIEW_TRANSITIONS;
 export type ViewTransitionKeys = keyof ViewTransitionTypes;
 
 export type DialogRouterOptions<T extends ViewMap> = {
   /**
-   * The root view state. Seeds the stack and is restored by `reset()` with no args.
+   * The initial view states. Seeds the stack and can be restored by calling `reset`
+   * without arguments.
    */
-  initial: ViewState<T>;
+  initial: ViewState<T>[];
   /**
    * Whether the user can navigate back. A function is re-evaluated against the
    * current snapshot on each render.
    *
-   * @default `snapshot.length > 1`
+   * @default (snapshot) => snapshot.stack.length > 1
    */
   allowBack?: (snapshot: Snapshot<T>) => boolean;
   /**
-   * How pressing Escape should be handled.
+   * How `<Escape>` press should be handled:
    * - `'back'` — pop the stack (handled by this hook)
    * - `'dismiss'` — close the dialog (consumer responsibility)
    * - `null` — ignore Escape
    *
-   * A function is re-evaluated against the current snapshot on each render.
-   *
-   * @default `'back'` when `isBackAllowed`, otherwise `'dismiss'`
+   * @default (snapshot) => allowBack(snapshot) ? 'back' : 'dismiss'
    */
-  escapeBehavior?: (snapshot: Snapshot<T>) => EscapeBehavior;
+  escapeBehavior?: (snapshot: Snapshot<T>) => EscapeKeyBehavior;
   /**
    * Wrap navigate/back/backTo in startTransition and tag them with transition
    * types for `<ViewTransition>`. Pass `false` to disable, or override the
    * type names.
+   *
+   * @see https://react.dev/reference/react/ViewTransition
    *
    * @default
    * { forwards: 'forwards', backwards: 'backwards' }
@@ -70,7 +71,7 @@ function resolveType(
   return viewTransitions[direction];
 }
 
-export type DialogRouterResult<T extends ViewMap> = ReturnType<
+export type DialogRouterState<T extends ViewMap> = ReturnType<
   typeof useDialogRouter<T>
 >;
 
@@ -148,9 +149,9 @@ export function useDialogRouter<T extends ViewMap>(
   );
 
   const reset = useCallback(
-    <K extends keyof T>(...args: ViewArgs<T, K> | []) => {
+    (...views: ViewState<T>[]): void => {
       // No navigation type — open/reset shouldn't slide like push/pop.
-      commit(() => router.reset(...args));
+      commit(() => router.reset(...views));
     },
     [router, commit],
   );
@@ -176,7 +177,8 @@ export function useDialogRouter<T extends ViewMap>(
   }, [escapeAction, back]);
 
   return {
-    snapshot,
+    current: snapshot.current,
+    stack: snapshot.stack,
     isBackAllowed,
     escapeAction,
     navigate,

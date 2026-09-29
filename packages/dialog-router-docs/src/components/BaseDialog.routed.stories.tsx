@@ -2,7 +2,7 @@ import { ViewTransition, use } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Dialog } from '@base-ui/react/dialog';
 
-import type { DialogRouterResult } from '@jossmac/dialog-router';
+import type { DialogRouterState } from '@jossmac/dialog-router';
 import {
   DialogRouter,
   DialogRouterContext,
@@ -34,10 +34,10 @@ type Views = {
 
 function RoutedBaseExample() {
   return (
-    <DialogRouter<Views> initial={{ view: 'home' }}>
-      {({ snapshot, escapeAction, navigate }) => (
+    <DialogRouter<Views> initial={[{ view: 'home' }]}>
+      {({ current, escapeAction, navigate }) => (
         <Dialog.Root
-          disablePointerDismissal={snapshot.current.view === 'confirm'}
+          disablePointerDismissal={current.view === 'confirm'}
           onOpenChange={(open, details) => {
             if (
               !open &&
@@ -51,8 +51,8 @@ function RoutedBaseExample() {
           <Dialog.Trigger className="button" data-variant="primary">
             Open
           </Dialog.Trigger>
-          <BaseDialog isDismissable={snapshot.current.view !== 'confirm'}>
-            {snapshot.current.view === 'home' && (
+          <BaseDialog isDismissable={current.view !== 'confirm'}>
+            {current.view === 'home' && (
               <DialogView title="Settings">
                 <p className="dialog-body">
                   Choose an item to review. Escape dismisses; navigating deeper
@@ -73,12 +73,12 @@ function RoutedBaseExample() {
                 </div>
               </DialogView>
             )}
-            {snapshot.current.view === 'details' && (
+            {current.view === 'details' && (
               <DetailsView
                 onContinue={(itemId) => navigate('confirm', { itemId })}
               />
             )}
-            {snapshot.current.view === 'confirm' && <ConfirmView />}
+            {current.view === 'confirm' && <ConfirmView />}
           </BaseDialog>
         </Dialog.Root>
       )}
@@ -87,8 +87,8 @@ function RoutedBaseExample() {
 }
 
 function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
-  const { isBackAllowed, back, snapshot } = useRouteContext();
-  const itemId = ensure(snapshot.current.params?.itemId, 'itemId is required');
+  const { isBackAllowed, back, current } = useRouteContext();
+  const itemId = ensure(current.params?.itemId, 'itemId is required');
 
   return (
     <DialogView title="Details">
@@ -120,11 +120,11 @@ function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
 }
 
 function ConfirmView() {
-  const { isBackAllowed, back, backTo, snapshot } = useRouteContext();
+  const { isBackAllowed, back, backTo, current } = useRouteContext();
   return (
     <DialogView title="Confirm">
       <p className="dialog-body">
-        Confirm changes for <code>{snapshot.current.params?.itemId}</code>?
+        Confirm changes for <code>{current.params?.itemId}</code>?
       </p>
       <div className="dialog-actions">
         <button
@@ -163,5 +163,5 @@ function DialogView(props: { children: React.ReactNode; title: string }) {
 
 function useRouteContext() {
   const ctx = ensure(use(DialogRouterContext), 'DialogRouterContext not found');
-  return ctx as DialogRouterResult<Views>;
+  return ctx as DialogRouterState<Views>;
 }

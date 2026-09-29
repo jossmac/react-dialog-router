@@ -25,7 +25,7 @@
   color: var(--bg);
 }
 
-.button[data-variant='primary']:hover,
+.button[data-variant='primary']:enabled:hover,
 .button[data-variant='primary'][data-hovered] {
   opacity: 0.9;
 }
@@ -36,7 +36,7 @@
   color: var(--text-strong);
 }
 
-.button[data-variant='secondary']:hover,
+.button[data-variant='secondary']:enabled:hover,
 .button[data-variant='secondary'][data-hovered] {
   background: var(--code-bg);
 }

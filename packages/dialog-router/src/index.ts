@@ -9,8 +9,8 @@ export type { DialogRouterViewProps } from './DialogRouterView';
 export { useDialogRouter } from './useDialogRouter';
 export type {
   DialogRouterOptions,
-  DialogRouterResult,
-  EscapeBehavior,
+  DialogRouterState,
+  EscapeKeyBehavior,
   ViewTransitionTypes,
   ViewTransitionKeys,
 } from './useDialogRouter';

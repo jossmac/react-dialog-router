@@ -5,14 +5,11 @@ import type { ReactNode } from 'react';
 import { DialogRouterContext } from './context';
 
 import { useDialogRouter } from './useDialogRouter';
-import type {
-  DialogRouterResult,
-  DialogRouterOptions,
-} from './useDialogRouter';
+import type { DialogRouterState, DialogRouterOptions } from './useDialogRouter';
 import type { ViewMap } from './core';
 
 export type DialogRouterProps<T extends ViewMap> = DialogRouterOptions<T> & {
-  children: ReactNode | ((renderProps: DialogRouterResult<T>) => ReactNode);
+  children: ReactNode | ((renderProps: DialogRouterState<T>) => ReactNode);
 };
 
 export function DialogRouter<T extends ViewMap>(props: DialogRouterProps<T>) {

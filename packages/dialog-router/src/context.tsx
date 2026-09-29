@@ -2,9 +2,10 @@
 
 import { createContext } from 'react';
 
-import type { DialogRouterResult } from './useDialogRouter';
+import type { DialogRouterState } from './useDialogRouter';
 
-export const DialogRouterContext =
-  createContext<DialogRouterResult<any> | null>(null);
+export const DialogRouterContext = createContext<DialogRouterState<any> | null>(
+  null,
+);
 
 export const hasNavigated = { value: false };

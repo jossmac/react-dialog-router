@@ -2,7 +2,7 @@ import { ViewTransition, use } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Heading } from 'react-aria-components/Heading';
 
-import type { DialogRouterResult } from '@jossmac/dialog-router';
+import type { DialogRouterState } from '@jossmac/dialog-router';
 import {
   DialogRouter,
   DialogRouterContext,
@@ -41,13 +41,18 @@ type Views = {
 
 function RoutedRacExample() {
   return (
-    <DialogRouter<Views> initial={{ view: 'home' }}>
-      {({ snapshot, escapeAction, navigate }) => (
+    <DialogRouter<Views>
+      initial={[
+        { view: 'home' },
+        { view: 'details', params: { itemId: 'widget-42' } },
+      ]}
+    >
+      {({ current, escapeAction, navigate }) => (
         <RacDialog
-          isDismissable={snapshot.current.view !== 'confirm'}
+          isDismissable={current.view !== 'confirm'}
           isKeyboardDismissDisabled={escapeAction !== 'dismiss'}
         >
-          {snapshot.current.view === 'home' && (
+          {current.view === 'home' && (
             <DialogView title="Settings">
               <p className="dialog-body">
                 Choose an item to review. Escape dismisses; navigating deeper
@@ -63,14 +68,12 @@ function RoutedRacExample() {
               </div>
             </DialogView>
           )}
-          {snapshot.current.view === 'details' && (
+          {current.view === 'details' && (
             <DetailsView
               onContinue={(itemId) => navigate('confirm', { itemId })}
             />
           )}
-          {snapshot.current.view === 'confirm' && (
-            <ConfirmView onDone={() => {}} />
-          )}
+          {current.view === 'confirm' && <ConfirmView onDone={() => {}} />}
         </RacDialog>
       )}
     </DialogRouter>
@@ -78,8 +81,8 @@ function RoutedRacExample() {
 }
 
 function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
-  const { isBackAllowed, back, snapshot } = useRouteContext();
-  const itemId = ensure(snapshot.current.params?.itemId, 'itemId is required');
+  const { isBackAllowed, back, current } = useRouteContext();
+  const itemId = ensure(current.params?.itemId, 'itemId is required');
 
   return (
     <DialogView title="Details">
@@ -99,11 +102,11 @@ function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
 }
 
 function ConfirmView({ onDone }: { onDone: () => void }) {
-  const { isBackAllowed, back, snapshot } = useRouteContext();
+  const { isBackAllowed, back, current } = useRouteContext();
   return (
     <DialogView title="Confirm">
       <p className="dialog-body">
-        Confirm changes for <code>{snapshot.current.params?.itemId}</code>?
+        Confirm changes for <code>{current.params?.itemId}</code>?
       </p>
       <div className="dialog-actions">
         {isBackAllowed && (
@@ -132,5 +135,5 @@ function DialogView(props: { children: React.ReactNode; title: string }) {
 
 function useRouteContext() {
   const ctx = ensure(use(DialogRouterContext), 'DialogRouterContext not found');
-  return ctx as DialogRouterResult<Views>;
+  return ctx as DialogRouterState<Views>;
 }

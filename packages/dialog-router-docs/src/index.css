@@ -5,6 +5,7 @@
   --text-strong: light-dark(#0c1210, #eef4f0);
   --brand: light-dark(#0f1412, #f3faf6);
   --bg: light-dark(#f3faf6, #0f1412);
+  --bg-elevated: light-dark(#fcfdfc, #191f1d);
   --border: light-dark(rgba(28, 38, 34, 0.14), rgba(232, 240, 236, 0.18));
   --accent: light-dark(#54d0ba, #3dbaa4);
   --accent-strong: light-dark(#3dbaa4, #54d0ba);

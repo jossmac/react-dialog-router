@@ -45,54 +45,51 @@ const DEFAULT_NAVIGATE_OPTIONS: NavigateOptions = {
 };
 
 export class DialogMemoryRouter<T extends ViewMap> {
+  private initialStack: ViewState<T>[];
   private stack: ViewState<T>[];
-  private initial: ViewState<T>;
   private listeners = new Set<(snapshot: Snapshot<T>) => void>();
-  private onDismiss?: () => void;
   private snapshot: Snapshot<T>;
 
-  constructor(initial: ViewState<T>, onDismiss?: () => void) {
-    this.initial = initial;
-    this.stack = [initial];
-    this.onDismiss = onDismiss;
+  constructor(initial: ViewState<T>[]) {
+    this.initialStack = [...initial];
+    this.stack = this.initialStack;
     this.snapshot = this.createSnapshot();
   }
 
-  subscribe = (listener: (snapshot: Snapshot<T>) => void) => {
-    this.listeners.add(listener);
-    return () => {
-      this.listeners.delete(listener);
-    };
-  };
-
-  // Stable reference when unchanged — callers may rely on referential equality.
-  getSnapshot = (): Snapshot<T> => {
-    return this.snapshot;
-  };
-
-  private createSnapshot = (): Snapshot<T> => {
+  private createSnapshot(): Snapshot<T> {
     return {
       current: this.stack[this.stack.length - 1],
       stack: [...this.stack],
       length: this.stack.length,
     };
-  };
+  }
 
-  navigate = <K extends keyof T>(
+  private notify() {
+    this.snapshot = this.createSnapshot();
+    this.listeners.forEach((listener) => listener(this.snapshot));
+  }
+
+  subscribe(listener: (snapshot: Snapshot<T>) => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  // Stable reference when unchanged — callers may rely on referential equality.
+  getSnapshot(): Snapshot<T> {
+    return this.snapshot;
+  }
+
+  navigate<K extends keyof T>(
     ...args: [...ViewArgs<T, K>, options?: NavigateOptions]
-  ) => {
+  ): void {
     const last = args[args.length - 1];
     const hasOptions = isNavigateOptions(last);
 
     const options = hasOptions ? last : DEFAULT_NAVIGATE_OPTIONS;
     const view = args[0] as K;
-    const params = hasOptions
-      ? args.length === 3
-        ? args[1]
-        : undefined
-      : args.length === 2
-        ? args[1]
-        : undefined;
+    const params = args[1] ?? undefined;
 
     const nextState = { view, params: params as T[K] };
 
@@ -103,41 +100,31 @@ export class DialogMemoryRouter<T extends ViewMap> {
     }
 
     this.notify();
-  };
+  }
 
-  back = () => {
+  back(): void {
     if (this.stack.length > 1) {
       this.stack.pop();
       this.notify();
     }
-  };
+  }
 
   // Pops back to the first matching target view in the history stack
-  backTo = (targetView: keyof T) => {
+  backTo(targetView: keyof T): void {
     const index = this.stack.findLastIndex((s) => s.view === targetView);
     if (index !== -1 && index !== this.stack.length - 1) {
       this.stack = this.stack.slice(0, index + 1);
       this.notify();
     }
-  };
+  }
 
   // Truncates back to the root or resets to a specified view state
-  reset = <K extends keyof T>(...args: ViewArgs<T, K> | []) => {
-    if (args.length === 0) {
-      this.stack = [this.initial];
+  reset(...views: ViewState<T>[]): void {
+    if (views.length === 0) {
+      this.stack = this.initialStack;
     } else {
-      const [view, params] = args as ViewArgs<T, K>;
-      this.stack = [{ view, params: params as T[K] }];
+      this.stack = views;
     }
     this.notify();
-  };
-
-  dismiss = () => {
-    this.onDismiss?.();
-  };
-
-  private notify() {
-    this.snapshot = this.createSnapshot();
-    this.listeners.forEach((listener) => listener(this.snapshot));
   }
 }
