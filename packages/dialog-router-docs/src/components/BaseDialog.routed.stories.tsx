@@ -3,11 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Dialog } from '@base-ui/react/dialog';
 
 import type { DialogRouterState } from '@jossmac/dialog-router';
-import {
-  DialogRouter,
-  DialogRouterContext,
-  DialogRouterView,
-} from '@jossmac/dialog-router';
+import { DialogRouter, DialogRouterContext, DialogRouterView } from '@jossmac/dialog-router';
 import { ensure } from '@jossmac/lil-libs/assert';
 
 import { BaseDialog } from './BaseDialog';
@@ -39,11 +35,7 @@ function RoutedBaseExample() {
         <Dialog.Root
           disablePointerDismissal={current.view === 'confirm'}
           onOpenChange={(open, details) => {
-            if (
-              !open &&
-              details.reason === 'escape-key' &&
-              escapeAction !== 'dismiss'
-            ) {
+            if (!open && details.reason === 'escape-key' && escapeAction !== 'dismiss') {
               details.cancel();
             }
           }}
@@ -55,8 +47,8 @@ function RoutedBaseExample() {
             {current.view === 'home' && (
               <DialogView title="Settings">
                 <p className="dialog-body">
-                  Choose an item to review. Escape dismisses; navigating deeper
-                  changes Escape to go back.
+                  Choose an item to review. Escape dismisses; navigating deeper changes Escape to go
+                  back.
                 </p>
                 <div className="dialog-actions">
                   <Dialog.Close className="button" data-variant="secondary">
@@ -74,9 +66,7 @@ function RoutedBaseExample() {
               </DialogView>
             )}
             {current.view === 'details' && (
-              <DetailsView
-                onContinue={(itemId) => navigate('confirm', { itemId })}
-              />
+              <DetailsView onContinue={(itemId) => navigate('confirm', { itemId })} />
             )}
             {current.view === 'confirm' && <ConfirmView />}
           </BaseDialog>
@@ -97,12 +87,7 @@ function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
       </p>
       <div className="dialog-actions">
         {isBackAllowed && (
-          <button
-            type="button"
-            className="button"
-            data-variant="secondary"
-            onClick={back}
-          >
+          <button type="button" className="button" data-variant="secondary" onClick={back}>
             Back
           </button>
         )}
@@ -136,12 +121,7 @@ function ConfirmView() {
           Back to start
         </button>
         {isBackAllowed && (
-          <button
-            type="button"
-            className="button"
-            data-variant="secondary"
-            onClick={back}
-          >
+          <button type="button" className="button" data-variant="secondary" onClick={back}>
             Back
           </button>
         )}

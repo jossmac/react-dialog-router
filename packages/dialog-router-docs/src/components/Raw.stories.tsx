@@ -91,10 +91,7 @@ export const AnimateDiscreteViews: Story = {
                 </Heading>
               </ViewTransition>
               <ViewTransition name="dialog-view">
-                <DialogRouterView
-                  aria-labelledby={headingId}
-                  style={{ paddingInline: 16 }}
-                >
+                <DialogRouterView aria-labelledby={headingId} style={{ paddingInline: 16 }}>
                   <Content {...renderProps} />
                 </DialogRouterView>
               </ViewTransition>
@@ -176,10 +173,7 @@ function Actions(props: DialogRouterState<Views> & StyleProps) {
       <Button isDisabled={!isBackAllowed} variant="secondary" onPress={back}>
         Back
       </Button>
-      <Button
-        isDisabled={!view.next}
-        onPress={view.next ? () => navigate(view.next) : undefined}
-      >
+      <Button isDisabled={!view.next} onPress={view.next ? () => navigate(view.next) : undefined}>
         Next
       </Button>
     </div>

@@ -8,13 +8,7 @@ import {
   useReducer,
   useState,
 } from 'react';
-import type {
-  NavigateOptions,
-  Snapshot,
-  ViewArgs,
-  ViewMap,
-  ViewState,
-} from './core';
+import type { NavigateOptions, Snapshot, ViewArgs, ViewMap, ViewState } from './core';
 import { DialogMemoryRouter, isNavigateOptions } from './core';
 
 const DEFAULT_VIEW_TRANSITIONS = {
@@ -71,13 +65,9 @@ function resolveType(
   return viewTransitions[direction];
 }
 
-export type DialogRouterState<T extends ViewMap> = ReturnType<
-  typeof useDialogRouter<T>
->;
+export type DialogRouterState<T extends ViewMap> = ReturnType<typeof useDialogRouter<T>>;
 
-export function useDialogRouter<T extends ViewMap>(
-  options: DialogRouterOptions<T>,
-) {
+export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<T>) {
   const { viewTransitions } = options;
   const forwardType = resolveType(viewTransitions, 'forwards');
   const backwardType = resolveType(viewTransitions, 'backwards');
@@ -87,10 +77,7 @@ export function useDialogRouter<T extends ViewMap>(
   // React state (not useSyncExternalStore): ViewTransition only activates for
   // updates scheduled inside startTransition. Store subscriptions are urgent
   // and bypass that.
-  const [snapshot, setSnapshot] = useReducer(
-    () => router.getSnapshot(),
-    router.getSnapshot(),
-  );
+  const [snapshot, setSnapshot] = useReducer(() => router.getSnapshot(), router.getSnapshot());
 
   const commit = useCallback((action: () => void) => {
     action();
@@ -105,17 +92,13 @@ export function useDialogRouter<T extends ViewMap>(
   }, []);
 
   const isBackAllowed = options.allowBack?.(snapshot) ?? snapshot.length > 1;
-  const escapeAction =
-    options.escapeBehavior?.(snapshot) ?? (isBackAllowed ? 'back' : 'dismiss');
+  const escapeAction = options.escapeBehavior?.(snapshot) ?? (isBackAllowed ? 'back' : 'dismiss');
 
   const navigate = useCallback(
-    <K extends keyof T>(
-      ...args: [...ViewArgs<T, K>, options?: NavigateOptions]
-    ) => {
+    <K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]) => {
       const last = args[args.length - 1];
       const navOpts = isNavigateOptions(last) ? last : undefined;
-      const skipTransition =
-        forwardType == null || navOpts?.transition === false;
+      const skipTransition = forwardType == null || navOpts?.transition === false;
 
       const run = () => commit(() => router.navigate(...args));
       if (skipTransition) {

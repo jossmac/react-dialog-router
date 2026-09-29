@@ -8,10 +8,7 @@ import './RacDialog.css';
 import { composeRenderProps } from 'react-aria-components';
 import { Button } from './Button';
 
-export type RacDialogProps = Omit<
-  ModalOverlayProps,
-  'children' | 'className' | 'style'
-> &
+export type RacDialogProps = Omit<ModalOverlayProps, 'children' | 'className' | 'style'> &
   Pick<DialogProps, 'children' | 'className' | 'style'> & {
     title?: ReactNode;
   };

@@ -13,9 +13,7 @@ export type Snapshot<T extends ViewMap> = {
   length: number;
 };
 
-export type ViewArgs<T extends ViewMap, K extends keyof T> = T[K] extends
-  | undefined
-  | void
+export type ViewArgs<T extends ViewMap, K extends keyof T> = T[K] extends undefined | void
   ? [view: K]
   : [view: K, params: T[K]];
 
@@ -81,15 +79,13 @@ export class DialogMemoryRouter<T extends ViewMap> {
     return this.snapshot;
   }
 
-  navigate<K extends keyof T>(
-    ...args: [...ViewArgs<T, K>, options?: NavigateOptions]
-  ): void {
+  navigate<K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]): void {
     const last = args[args.length - 1];
     const hasOptions = isNavigateOptions(last);
 
     const options = hasOptions ? last : DEFAULT_NAVIGATE_OPTIONS;
     const view = args[0] as K;
-    const params = args[1] ?? undefined;
+    const params = args.length === (hasOptions ? 3 : 2) ? args[1] : undefined;
 
     const nextState = { view, params: params as T[K] };
 

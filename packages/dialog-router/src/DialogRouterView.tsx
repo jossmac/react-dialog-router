@@ -38,11 +38,7 @@ export function DialogRouterView(props: DialogRouterViewProps) {
   const { stack, escapeAction } = use(DialogRouterContext)!;
 
   useEffect(function checkAriaProps() {
-    if (
-      process.env.NODE_ENV !== 'production' &&
-      !hasWarned.current &&
-      localRef.current
-    ) {
+    if (process.env.NODE_ENV !== 'production' && !hasWarned.current && localRef.current) {
       const element = localRef.current;
       const hasAriaLabel = element.hasAttribute('aria-label');
       const hasAriaLabelledby = element.hasAttribute('aria-labelledby');

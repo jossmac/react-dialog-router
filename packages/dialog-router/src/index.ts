@@ -16,10 +16,4 @@ export type {
 } from './useDialogRouter';
 
 export { DialogMemoryRouter } from './core';
-export type {
-  ViewMap,
-  ViewState,
-  Snapshot,
-  ViewArgs,
-  NavigateOptions,
-} from './core';
+export type { ViewMap, ViewState, Snapshot, ViewArgs, NavigateOptions } from './core';

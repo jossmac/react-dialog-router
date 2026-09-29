@@ -3,11 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Heading } from 'react-aria-components/Heading';
 
 import type { DialogRouterState } from '@jossmac/dialog-router';
-import {
-  DialogRouter,
-  DialogRouterContext,
-  DialogRouterView,
-} from '@jossmac/dialog-router';
+import { DialogRouter, DialogRouterContext, DialogRouterView } from '@jossmac/dialog-router';
 import { ensure } from '@jossmac/lil-libs/assert';
 import { DialogTrigger } from 'react-aria-components';
 
@@ -42,10 +38,7 @@ type Views = {
 function RoutedRacExample() {
   return (
     <DialogRouter<Views>
-      initial={[
-        { view: 'home' },
-        { view: 'details', params: { itemId: 'widget-42' } },
-      ]}
+      initial={[{ view: 'home' }, { view: 'details', params: { itemId: 'widget-42' } }]}
     >
       {({ current, escapeAction, navigate }) => (
         <RacDialog
@@ -55,23 +48,19 @@ function RoutedRacExample() {
           {current.view === 'home' && (
             <DialogView title="Settings">
               <p className="dialog-body">
-                Choose an item to review. Escape dismisses; navigating deeper
-                changes Escape to go back.
+                Choose an item to review. Escape dismisses; navigating deeper changes Escape to go
+                back.
               </p>
               <div className="dialog-actions">
                 <Button variant="secondary">Close</Button>
-                <Button
-                  onPress={() => navigate('details', { itemId: 'widget-42' })}
-                >
+                <Button onPress={() => navigate('details', { itemId: 'widget-42' })}>
                   View details
                 </Button>
               </div>
             </DialogView>
           )}
           {current.view === 'details' && (
-            <DetailsView
-              onContinue={(itemId) => navigate('confirm', { itemId })}
-            />
+            <DetailsView onContinue={(itemId) => navigate('confirm', { itemId })} />
           )}
           {current.view === 'confirm' && <ConfirmView onDone={() => {}} />}
         </RacDialog>

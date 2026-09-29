@@ -16,19 +16,11 @@ export function BaseDialog(props: BaseDialogProps) {
     <Dialog.Portal>
       <Dialog.Backdrop className="base-dialog-backdrop" />
       <Dialog.Popup
-        className={['dialog-surface', 'base-dialog-popup', className]
-          .filter(Boolean)
-          .join(' ')}
+        className={['dialog-surface', 'base-dialog-popup', className].filter(Boolean).join(' ')}
       >
-        {title != null && (
-          <Dialog.Title className="dialog-title">{title}</Dialog.Title>
-        )}
+        {title != null && <Dialog.Title className="dialog-title">{title}</Dialog.Title>}
         {isDismissable && (
-          <Dialog.Close
-            aria-label="Close"
-            className="dialog-close button"
-            data-variant="secondary"
-          >
+          <Dialog.Close aria-label="Close" className="dialog-close button" data-variant="secondary">
             &times;
           </Dialog.Close>
         )}
