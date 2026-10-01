@@ -110,8 +110,9 @@ function ConfirmView({ onDone }: { onDone: () => void }) {
 }
 
 function DialogView(props: { children: React.ReactNode; title: string }) {
+  const { current } = useRouteContext();
   return (
-    <ViewTransition name="slide-x">
+    <ViewTransition key={current.key} name="slide-x">
       <DialogRouterView className="dialog-view" aria-label={props.title}>
         <Heading slot="title" className="dialog-title">
           {props.title}

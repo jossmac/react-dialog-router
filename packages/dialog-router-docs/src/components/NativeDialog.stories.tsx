@@ -8,7 +8,7 @@ import type { DialogRouterState } from '@jossmac/dialog-router';
 import { DialogRouter, DialogRouterView } from '@jossmac/dialog-router';
 
 import { Button } from './Button';
-import { RacDialog } from './RacDialog';
+import { NativeDialog } from './NativeDialog';
 import { ListBox, ListBoxItem } from './ListBox';
 import { Select, SelectItem } from './Select';
 import { DialogTrigger, Form } from 'react-aria-components';
@@ -33,12 +33,15 @@ export const Default: Story = {
         const view = VIEW_MAP[current.view];
 
         return (
-          <RacDialog isOpen>
-            <DialogView title={view.title}>
-              <Content {...renderProps} />
-              <Actions {...renderProps} />
-            </DialogView>
-          </RacDialog>
+          <>
+            <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
+            <NativeDialog open>
+              <DialogView title={view.title}>
+                <Content {...renderProps} />
+                <Actions {...renderProps} />
+              </DialogView>
+            </NativeDialog>
+          </>
         );
       }}
     </DialogRouter>
@@ -53,12 +56,15 @@ export const AnimateViewsVT: Story = {
         const view = VIEW_MAP[current.view];
 
         return (
-          <RacDialog isOpen>
-            <DialogView title={view.title} includeViewTransition>
-              <Content {...renderProps} />
-              <Actions {...renderProps} />
-            </DialogView>
-          </RacDialog>
+          <>
+            <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
+            <NativeDialog open>
+              <DialogView title={view.title} includeViewTransition>
+                <Content {...renderProps} />
+                <Actions {...renderProps} />
+              </DialogView>
+            </NativeDialog>
+          </>
         );
       }}
     </DialogRouter>
@@ -77,32 +83,35 @@ export const AnimateDiscreteViewsVT: Story = {
           const headingId = `${rootId}-${view.title}`;
 
           return (
-            <RacDialog isOpen>
-              <DialogRouterView
-                aria-labelledby={headingId}
-                style={{
-                  width: 440,
-                  paddingBlock: 16,
-                  display: 'grid',
-                  gap: 16,
-                }}
-              >
-                <ViewTransition>
-                  <Heading
-                    slot="title"
-                    id={headingId}
-                    className="dialog-title"
-                    style={{ paddingInline: 16 }}
-                  >
-                    {view.title}
-                  </Heading>
-                </ViewTransition>
-                <ViewTransition name="slide-x">
-                  <Content {...renderProps} style={{ paddingInline: 16 }} />
-                </ViewTransition>
-                <Actions {...renderProps} style={{ paddingInline: 16 }} />
-              </DialogRouterView>
-            </RacDialog>
+            <>
+              <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
+              <NativeDialog open>
+                <DialogRouterView
+                  aria-labelledby={headingId}
+                  style={{
+                    width: 440,
+                    paddingBlock: 16,
+                    display: 'grid',
+                    gap: 16,
+                  }}
+                >
+                  <ViewTransition>
+                    <Heading
+                      slot="title"
+                      id={headingId}
+                      className="dialog-title"
+                      style={{ paddingInline: 16 }}
+                    >
+                      {view.title}
+                    </Heading>
+                  </ViewTransition>
+                  <ViewTransition name="slide-x">
+                    <Content {...renderProps} style={{ paddingInline: 16 }} />
+                  </ViewTransition>
+                  <Actions {...renderProps} style={{ paddingInline: 16 }} />
+                </DialogRouterView>
+              </NativeDialog>
+            </>
           );
         }}
       </DialogRouter>
@@ -155,12 +164,15 @@ export const Forms: Story = {
   render: () => (
     <DialogRouter<FormViews> initial={[{ view: 'root' }]}>
       {(renderProps) => {
-        const { back, backTo, current, escapeAction, navigate } = renderProps;
+        const { back, backTo, current, navigate } = renderProps;
 
         return (
-          <DialogTrigger defaultOpen>
-            <Button>Open</Button>
-            <RacDialog isDismissable isKeyboardDismissDisabled={escapeAction !== 'dismiss'}>
+          <>
+            <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
+            <NativeDialog
+            // isDismissable
+            // isKeyboardDismissDisabled={escapeAction !== 'dismiss'}
+            >
               {current.view === 'root' && (
                 <DialogView title="What would you like?" includeViewTransition>
                   <ListBox
@@ -241,8 +253,8 @@ export const Forms: Story = {
                   </div>
                 </DialogView>
               )}
-            </RacDialog>
-          </DialogTrigger>
+            </NativeDialog>
+          </>
         );
       }}
     </DialogRouter>
@@ -281,6 +293,7 @@ function DialogView(props: {
         display: 'grid',
         gap: 16,
         padding: 16,
+        maxWidth: '100%',
       }}
     >
       <Heading slot="title" className="dialog-title" id={headingId}>

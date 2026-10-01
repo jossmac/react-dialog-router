@@ -18,6 +18,8 @@
   "scripts": {
     "build": "vite build && tsc -p tsconfig.build.json",
     "dev": "vite build --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "check:types": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
@@ -31,7 +33,8 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "vitest": "^4.0.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

@@ -11,6 +11,7 @@
     "check:format": "oxfmt --check",
     "check:all": "pnpm check:lint && pnpm check:types && pnpm check:format",
     "format": "oxfmt",
+    "test": "pnpm --filter @jossmac/dialog-router test",
     "preview": "pnpm --filter @jossmac/dialog-router-docs preview",
     "storybook": "pnpm --filter @jossmac/dialog-router-docs storybook",
     "build-storybook": "pnpm --filter @jossmac/dialog-router-docs build-storybook"

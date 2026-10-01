@@ -16,4 +16,13 @@ export type {
 } from './useDialogRouter';
 
 export { MemoryRouter } from './core';
-export type { ViewMap, ViewState, Snapshot, ViewArgs, BackToArgs, NavigateOptions } from './core';
+export type {
+  ViewMap,
+  ViewState,
+  StackEntry,
+  Snapshot,
+  NavigationAction,
+  NavigationEvent,
+  ViewArgs,
+  BackToArgs,
+} from './core';

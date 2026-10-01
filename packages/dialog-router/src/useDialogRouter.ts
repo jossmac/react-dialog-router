@@ -8,18 +8,28 @@ import {
   useReducer,
   useState,
 } from 'react';
-import type { BackToArgs, NavigateOptions, Snapshot, ViewArgs, ViewMap, ViewState } from './core';
-import { MemoryRouter, isNavigateOptions } from './core';
+import type {
+  BackToArgs,
+  NavigationAction,
+  NavigationEvent,
+  Snapshot,
+  ViewArgs,
+  ViewMap,
+  ViewState,
+} from './core';
+import { MemoryRouter } from './core';
 
-const DEFAULT_VIEW_TRANSITIONS = {
-  backwards: 'dialog-router-backwards',
-  forwards: 'dialog-router-forwards',
+const DEFAULT_VIEW_TRANSITIONS: Record<NavigationAction, string | false> = {
+  back: 'dialog-router-backwards',
+  backTo: 'dialog-router-backwards',
+  push: 'dialog-router-forwards',
+  replace: false,
+  reset: false,
 };
 
 export type EscapeKeyBehavior = 'back' | 'dismiss' | null;
 
 export type ViewTransitionTypes = typeof DEFAULT_VIEW_TRANSITIONS;
-export type ViewTransitionKeys = keyof ViewTransitionTypes;
 
 export type DialogRouterOptions<T extends ViewMap> = {
   /**
@@ -44,9 +54,9 @@ export type DialogRouterOptions<T extends ViewMap> = {
    */
   escapeBehavior?: (snapshot: Snapshot<T>) => EscapeKeyBehavior;
   /**
-   * Wrap navigate/back/backTo in startTransition and tag them with transition
-   * types for `<ViewTransition>`. Pass `false` to disable, or override the
-   * type names.
+   * Wrap navigate/replace/back/backTo in startTransition and tag them with
+   * transition types for `<ViewTransition>`. Pass `false` to disable, or
+   * override the type names.
    *
    * @see https://react.dev/reference/react/ViewTransition
    *
@@ -58,19 +68,17 @@ export type DialogRouterOptions<T extends ViewMap> = {
 
 function resolveType(
   viewTransitions: false | ViewTransitionTypes = DEFAULT_VIEW_TRANSITIONS,
-  direction: ViewTransitionKeys,
-): string | null {
-  if (viewTransitions === false) return null;
+  action: NavigationAction,
+): string | false {
+  if (viewTransitions === false) return false;
 
-  return viewTransitions[direction];
+  return viewTransitions[action];
 }
 
 export type DialogRouterState<T extends ViewMap> = ReturnType<typeof useDialogRouter<T>>;
 
 export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<T>) {
-  const { viewTransitions } = options;
-  const forwardType = resolveType(viewTransitions, 'forwards');
-  const backwardType = resolveType(viewTransitions, 'backwards');
+  const { viewTransitions = DEFAULT_VIEW_TRANSITIONS } = options;
 
   const [router] = useState(() => new MemoryRouter<T>(options.initial));
 
@@ -95,40 +103,52 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
   const escapeAction = options.escapeBehavior?.(snapshot) ?? (isBackAllowed ? 'back' : 'dismiss');
 
   const navigate = useCallback(
-    <K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]) => {
-      const last = args[args.length - 1];
-      const navOpts = isNavigateOptions(last) ? last : undefined;
-      const skipTransition = forwardType == null || navOpts?.transition === false;
-
+    <K extends keyof T>(...args: ViewArgs<T, K>) => {
       const run = () => commit(() => router.navigate(...args));
-      if (skipTransition) {
-        run();
+      const transitionType = resolveType(viewTransitions, 'push');
+      if (transitionType) {
+        commitTransition(transitionType, run);
       } else {
-        commitTransition(forwardType, run);
+        run();
       }
     },
-    [router, forwardType, commit, commitTransition],
+    [router, viewTransitions, commit, commitTransition],
+  );
+
+  const replace = useCallback(
+    <K extends keyof T>(...args: ViewArgs<T, K>) => {
+      const run = () => commit(() => router.replace(...args));
+      const transitionType = resolveType(viewTransitions, 'replace');
+      if (transitionType) {
+        commitTransition(transitionType, run);
+      } else {
+        run();
+      }
+    },
+    [router, viewTransitions, commit, commitTransition],
   );
 
   const back = useCallback(() => {
     const run = () => commit(() => router.back());
-    if (backwardType == null) {
-      run();
+    const transitionType = resolveType(viewTransitions, 'back');
+    if (transitionType) {
+      commitTransition(transitionType, run);
     } else {
-      commitTransition(backwardType, run);
+      run();
     }
-  }, [router, backwardType, commit, commitTransition]);
+  }, [router, viewTransitions, commit, commitTransition]);
 
   const backTo = useCallback(
     <K extends keyof T>(...args: BackToArgs<T, K>) => {
       const run = () => commit(() => router.backTo(...args));
-      if (backwardType == null) {
-        run();
+      const transitionType = resolveType(viewTransitions, 'backTo');
+      if (transitionType) {
+        commitTransition(transitionType, run);
       } else {
-        commitTransition(backwardType, run);
+        run();
       }
     },
-    [router, backwardType, commit, commitTransition],
+    [router, viewTransitions, commit, commitTransition],
   );
 
   const reset = useCallback(
@@ -140,7 +160,7 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
   );
 
   const subscribe = useCallback(
-    (listener: (snapshot: Snapshot<T>) => void) => router.subscribe(listener),
+    (listener: (event: NavigationEvent<T>) => void) => router.subscribe(listener),
     [router],
   );
 
@@ -166,6 +186,7 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
     isBackAllowed,
     escapeAction,
     navigate,
+    replace,
     back,
     backTo,
     reset,

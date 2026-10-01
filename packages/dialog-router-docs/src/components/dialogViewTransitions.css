@@ -1,6 +1,6 @@
 ::view-transition-group(slide-x) {
   animation-duration: 240ms;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-timing-function: var(--ease-out-smooth);
   animation-fill-mode: both;
   overflow-x: clip;
   --slideDistance: 28%;

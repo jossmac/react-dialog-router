@@ -1,15 +1,24 @@
-import { isPlainObject } from '@jossmac/lil-libs/object';
-
 export type ViewMap = Record<string, unknown>;
 
 export type ViewState<T extends ViewMap, K extends keyof T = keyof T> = {
   [P in K]: undefined extends T[P] ? { view: P; params?: T[P] } : { view: P; params: T[P] };
 }[K];
 
+export type StackEntry<T extends ViewMap, K extends keyof T = keyof T> = ViewState<T, K> & {
+  key: string;
+};
+
 export type Snapshot<T extends ViewMap> = {
-  current: ViewState<T>;
-  stack: ViewState<T>[];
+  current: StackEntry<T>;
+  stack: StackEntry<T>[];
   length: number;
+};
+
+export type NavigationAction = 'push' | 'replace' | 'back' | 'backTo' | 'reset';
+
+export type NavigationEvent<T extends ViewMap> = {
+  snapshot: Snapshot<T>;
+  action: NavigationAction;
 };
 
 export type ViewArgs<T extends ViewMap, K extends keyof T> = T[K] extends undefined | void
@@ -21,40 +30,28 @@ export type BackToArgs<T extends ViewMap, K extends keyof T> = T[K] extends unde
   ? [view: K]
   : [view: K, params?: T[K]];
 
-export type NavigateOptions = {
-  /**
-   * When true, replace the current view in the stack instead of pushing a new one.
-   * @default false
-   */
-  replace?: boolean;
-  /**
-   * When false, skip the view-transition wrapper for this call.
-   * @default true
-   */
-  transition?: boolean;
-};
-
-export function isNavigateOptions(value: unknown): value is NavigateOptions {
-  if (isPlainObject(value)) {
-    return 'replace' in value || 'transition' in value;
-  }
-  return false;
+function createKey(): string {
+  return crypto.randomUUID();
 }
 
-const DEFAULT_NAVIGATE_OPTIONS: NavigateOptions = {
-  replace: false,
-  transition: true,
-};
+function toEntry<T extends ViewMap>(state: ViewState<T>): StackEntry<T> {
+  return { ...state, key: createKey() } as StackEntry<T>;
+}
+
+function cloneViewState<T extends ViewMap>(state: ViewState<T>): ViewState<T> {
+  return { ...state } as ViewState<T>;
+}
 
 export class MemoryRouter<T extends ViewMap> {
-  private initialStack: ViewState<T>[];
-  private stack: ViewState<T>[];
-  private listeners = new Set<(snapshot: Snapshot<T>) => void>();
+  /** Pristine input descriptors — never mutated; used by no-arg `reset()`. */
+  private readonly initial: ViewState<T>[];
+  private stack: StackEntry<T>[];
+  private listeners = new Set<(event: NavigationEvent<T>) => void>();
   private snapshot: Snapshot<T>;
 
   constructor(initial: ViewState<T>[]) {
-    this.initialStack = [...initial];
-    this.stack = this.initialStack;
+    this.initial = initial.map(cloneViewState);
+    this.stack = this.initial.map(toEntry);
     this.snapshot = this.createSnapshot();
   }
 
@@ -66,12 +63,13 @@ export class MemoryRouter<T extends ViewMap> {
     };
   }
 
-  private notify() {
+  private notify(action: NavigationAction) {
     this.snapshot = this.createSnapshot();
-    this.listeners.forEach((listener) => listener(this.snapshot));
+    const event: NavigationEvent<T> = { snapshot: this.snapshot, action };
+    this.listeners.forEach((listener) => listener(event));
   }
 
-  subscribe(listener: (snapshot: Snapshot<T>) => void): () => void {
+  subscribe(listener: (event: NavigationEvent<T>) => void): () => void {
     this.listeners.add(listener);
     return () => {
       this.listeners.delete(listener);
@@ -83,52 +81,47 @@ export class MemoryRouter<T extends ViewMap> {
     return this.snapshot;
   }
 
-  navigate<K extends keyof T>(...args: [...ViewArgs<T, K>, options?: NavigateOptions]): void {
-    const last = args[args.length - 1];
-    const hasOptions = isNavigateOptions(last);
+  navigate<K extends keyof T>(...args: ViewArgs<T, K>): void {
+    const [view, params] = args;
+    this.stack.push({ view, params, key: createKey() } as StackEntry<T>);
+    this.notify('push');
+  }
 
-    const options = hasOptions ? last : DEFAULT_NAVIGATE_OPTIONS;
-    const view = args[0] as K;
-    const params = args.length === (hasOptions ? 3 : 2) ? args[1] : undefined;
-
-    const nextState = { view, params: params as T[K] };
-
-    if (options.replace) {
-      this.stack[this.stack.length - 1] = nextState;
-    } else {
-      this.stack.push(nextState);
-    }
-
-    this.notify();
+  replace<K extends keyof T>(...args: ViewArgs<T, K>): void {
+    const [view, params] = args;
+    const { key } = this.stack[this.stack.length - 1];
+    this.stack[this.stack.length - 1] = { view, params, key } as StackEntry<T>;
+    this.notify('replace');
   }
 
   back(): void {
     if (this.stack.length > 1) {
       this.stack.pop();
-      this.notify();
+      this.notify('back');
     }
   }
 
-  // Pops back to the last matching target view; optionally replaces its params
+  /** Pops back to the last matching target view; optionally replaces its params. */
   backTo<K extends keyof T>(...args: BackToArgs<T, K>): void {
-    const [targetView, params] = args;
-    const index = this.stack.findLastIndex((s) => s.view === targetView);
+    const [view, params] = args;
+    const index = this.stack.findLastIndex((s) => s.view === view);
     if (index === -1 || index === this.stack.length - 1) return;
 
     this.stack = this.stack.slice(0, index + 1);
-    if (args.length === 2) {
-      this.stack[index] = { view: targetView, params } as ViewState<T>;
+    if (params) {
+      const { key } = this.stack[index];
+      this.stack[index] = { view, params, key } as StackEntry<T>;
     }
-    this.notify();
+    this.notify('backTo');
   }
 
-  // Truncates back to the root or resets to a specified view state
+  /** Restores the seed stack (fresh keys) or replaces the stack with the given views. */
   reset(...views: ViewState<T>[]): void {
     if (views.length === 0) {
-      this.stack = this.initialStack;
+      this.stack = this.initial.map(toEntry);
     } else {
-      this.stack = views;
+      this.stack = views.map(toEntry);
     }
-    this.notify();
+    this.notify('reset');
   }
 }
