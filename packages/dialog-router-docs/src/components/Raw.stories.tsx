@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { ViewTransition, useId } from 'react';
+import type { SomeOptional } from '@jossmac/lil-libs/types';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Heading } from 'react-aria-components/Heading';
 
@@ -8,6 +9,11 @@ import { DialogRouter, DialogRouterView } from '@jossmac/dialog-router';
 
 import { Button } from './Button';
 import { RacDialog } from './RacDialog';
+import { ListBox, ListBoxItem } from './ListBox';
+import { Select, SelectItem } from './Select';
+import { DialogTrigger, Form } from 'react-aria-components';
+import { pluralize } from '@jossmac/lil-libs/string';
+import { NumberField } from './NumberField';
 
 const meta = {
   title: 'DialogRouter',
@@ -102,6 +108,145 @@ export const AnimateDiscreteViewsVT: Story = {
       </DialogRouter>
     );
   },
+};
+
+const FRUITS = [
+  'apple',
+  'banana',
+  'cherry',
+  'grape',
+  'lemon',
+  'mango',
+  'orange',
+  'pear',
+  'strawberry',
+  'watermelon',
+] as const;
+const VEGETABLES = [
+  'broccoli',
+  'carrot',
+  'cucumber',
+  'eggplant',
+  'garlic',
+  'onion',
+  'pepper',
+  'potato',
+  'tomato',
+  'zucchini',
+] as const;
+const TYPES = {
+  fruit: FRUITS,
+  vegetable: VEGETABLES,
+};
+
+type Fruit = (typeof FRUITS)[number];
+type Vegetable = (typeof VEGETABLES)[number];
+type SummaryParams = {
+  type: keyof typeof TYPES;
+  selection: Fruit | Vegetable;
+  count: number;
+};
+type FormViews = {
+  root: undefined;
+  form: SomeOptional<SummaryParams, 'selection' | 'count'>;
+  summary: SummaryParams;
+};
+export const Forms: Story = {
+  render: () => (
+    <DialogRouter<FormViews> initial={[{ view: 'root' }]}>
+      {(renderProps) => {
+        const { back, backTo, current, escapeAction, navigate } = renderProps;
+
+        return (
+          <DialogTrigger defaultOpen>
+            <Button>Open</Button>
+            <RacDialog isDismissable isKeyboardDismissDisabled={escapeAction !== 'dismiss'}>
+              {current.view === 'root' && (
+                <DialogView title="What would you like?" includeViewTransition>
+                  <ListBox
+                    aria-label="Select a type"
+                    selectionMode="single"
+                    items={[
+                      { id: 'fruit', label: 'Fruit' },
+                      { id: 'vegetable', label: 'Vegetable' },
+                    ]}
+                    onSelectionChange={(selection) => {
+                      if (selection === 'all') return;
+                      const key = selection.keys().next().value;
+                      if (key === 'fruit' || key === 'vegetable') {
+                        navigate('form', { type: key });
+                      }
+                    }}
+                  >
+                    {(item) => <ListBoxItem key={item.id}>{item.label}</ListBoxItem>}
+                  </ListBox>
+                </DialogView>
+              )}
+              {current.view === 'form' && (
+                <DialogView title="Selection" includeViewTransition>
+                  <Form
+                    action={(formData) => {
+                      const selection = formData.get('selection') as Fruit | Vegetable;
+                      const count = Number(formData.get('count')) || 1;
+                      // if (!selection || count < 1) return;
+                      navigate('summary', {
+                        count,
+                        selection,
+                        type: current.params.type,
+                      });
+                    }}
+                    style={{ display: 'grid', gap: 16 }}
+                  >
+                    <Select
+                      isRequired
+                      name="selection"
+                      label={current.params.type}
+                      defaultValue={current.params.selection ?? TYPES[current.params.type][0]}
+                      items={TYPES[current.params.type].map((item) => ({
+                        id: item,
+                        label: item,
+                      }))}
+                    >
+                      {(item) => <SelectItem key={item.id}>{item.label}</SelectItem>}
+                    </Select>
+                    <NumberField
+                      label="Count"
+                      name="count"
+                      minValue={1}
+                      maxValue={10}
+                      step={1}
+                      defaultValue={current.params.count ?? 1}
+                    />
+                    <div className="dialog-actions">
+                      <Button variant="secondary" onPress={back}>
+                        Back
+                      </Button>
+                      <Button type="submit">Next</Button>
+                    </div>
+                  </Form>
+                </DialogView>
+              )}
+              {current.view === 'summary' && (
+                <DialogView title="Summary" includeViewTransition>
+                  <div>
+                    <p>
+                      You have selected {pluralize(current.params.count, current.params.selection)}.
+                    </p>
+                  </div>
+                  <div className="dialog-actions">
+                    <Button variant="secondary" onPress={() => backTo('form', current.params)}>
+                      Back
+                    </Button>
+                    <Button slot="close">Confirm</Button>
+                  </div>
+                </DialogView>
+              )}
+            </RacDialog>
+          </DialogTrigger>
+        );
+      }}
+    </DialogRouter>
+  ),
 };
 
 type Views = Record<keyof typeof VIEW_MAP, undefined>;

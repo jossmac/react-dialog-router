@@ -21,7 +21,7 @@
     "check:types": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@jossmac/lil-libs": "^3.2.0"
+    "@jossmac/lil-libs": "^3.2.1"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

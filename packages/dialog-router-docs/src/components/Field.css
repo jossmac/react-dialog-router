@@ -1,0 +1,27 @@
+.react-aria-Label {
+  display: block;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-strong);
+  margin-bottom: 6px;
+  cursor: default;
+}
+
+.react-aria-FieldError {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--invalid, #d64545);
+  margin-top: 4px;
+}
+
+.field-description {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text);
+  margin-top: 4px;
+}
+
+[data-invalid] > .field-description {
+  display: none;
+}

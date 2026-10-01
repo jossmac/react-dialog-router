@@ -14,7 +14,7 @@
   "dependencies": {
     "@base-ui/react": "catalog:",
     "@jossmac/dialog-router": "workspace:*",
-    "@jossmac/lil-libs": "^3.2.0",
+    "@jossmac/lil-libs": "^3.2.1",
     "react": "catalog:",
     "react-aria-components": "catalog:",
     "react-dom": "catalog:"

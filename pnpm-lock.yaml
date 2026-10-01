@@ -200,8 +200,8 @@ importers:
   packages/dialog-router:
     dependencies:
       '@jossmac/lil-libs':
-        specifier: ^3.2.0
-        version: 3.2.0
+        specifier: ^3.2.1
+        version: 3.2.1
     devDependencies:
       '@types/node':
         specifier: ^24.13.3
@@ -237,8 +237,8 @@ importers:
         specifier: workspace:*
         version: link:../dialog-router
       '@jossmac/lil-libs':
-        specifier: ^3.2.0
-        version: 3.2.0
+        specifier: ^3.2.1
+        version: 3.2.1
       react:
         specifier: 'catalog:'
         version: 19.3.0
@@ -596,8 +596,8 @@ packages:
       typescript:
         optional: true
 
-  '@jossmac/lil-libs@3.2.0':
-    resolution: {integrity: sha512-Nu/GxpCEp1y0Pv68EQCldiif6PHvOerkNVFfx8ehNfetReA26jLsuU4Tvcwy8qt5vvJArJ/YWj6ZsXgEJm4caw==}
+  '@jossmac/lil-libs@3.2.1':
+    resolution: {integrity: sha512-IX4KcixKtAZqZkwy2kBFgAgk1jQguv0aaxKT5q6U39p6KaI+5RqUmn3pRjOm41oICIkoEggDW7Hr0KCamVfXCw==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -2284,7 +2284,7 @@ snapshots:
     optionalDependencies:
       typescript: 6.0.3
 
-  '@jossmac/lil-libs@3.2.0': {}
+  '@jossmac/lil-libs@3.2.1': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

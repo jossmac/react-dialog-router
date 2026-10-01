@@ -1,0 +1,39 @@
+.react-aria-TextField {
+  display: flex;
+  flex-direction: column;
+}
+
+.react-aria-Input {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-strong);
+  background: var(--bg-elevated);
+  outline: none;
+}
+
+.react-aria-Input::placeholder {
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.react-aria-Input:focus,
+.react-aria-Input[data-focused] {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.react-aria-Input[data-invalid] {
+  border-color: var(--invalid, #d64545);
+}
+
+.react-aria-Input:disabled,
+.react-aria-Input[data-disabled] {
+  opacity: 0.5;
+}

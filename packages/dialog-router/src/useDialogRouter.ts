@@ -8,8 +8,8 @@ import {
   useReducer,
   useState,
 } from 'react';
-import type { NavigateOptions, Snapshot, ViewArgs, ViewMap, ViewState } from './core';
-import { DialogMemoryRouter, isNavigateOptions } from './core';
+import type { BackToArgs, NavigateOptions, Snapshot, ViewArgs, ViewMap, ViewState } from './core';
+import { MemoryRouter, isNavigateOptions } from './core';
 
 const DEFAULT_VIEW_TRANSITIONS = {
   backwards: 'dialog-router-backwards',
@@ -72,7 +72,7 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
   const forwardType = resolveType(viewTransitions, 'forwards');
   const backwardType = resolveType(viewTransitions, 'backwards');
 
-  const [router] = useState(() => new DialogMemoryRouter<T>(options.initial));
+  const [router] = useState(() => new MemoryRouter<T>(options.initial));
 
   // React state (not useSyncExternalStore): ViewTransition only activates for
   // updates scheduled inside startTransition. Store subscriptions are urgent
@@ -120,8 +120,8 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
   }, [router, backwardType, commit, commitTransition]);
 
   const backTo = useCallback(
-    (targetView: keyof T) => {
-      const run = () => commit(() => router.backTo(targetView));
+    <K extends keyof T>(...args: BackToArgs<T, K>) => {
+      const run = () => commit(() => router.backTo(...args));
       if (backwardType == null) {
         run();
       } else {
@@ -149,7 +149,8 @@ export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<
     if (escapeAction !== 'back') return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
+      if (event.defaultPrevented || event.key !== 'Escape') return;
+
       event.preventDefault();
       event.stopPropagation();
       back();

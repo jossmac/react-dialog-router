@@ -1,0 +1,62 @@
+@import './TextField.css';
+
+.react-aria-NumberField {
+  color: var(--text);
+}
+
+.react-aria-NumberField .react-aria-Group {
+  display: flex;
+  min-width: fit-content;
+  border-radius: 8px;
+  position: relative;
+}
+
+.react-aria-NumberField .react-aria-Group[data-invalid]::after,
+.react-aria-NumberField .react-aria-Group[data-focus-within]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.react-aria-NumberField .react-aria-Group[data-invalid]::after {
+  outline: 1px solid var(--invalid, #d64545);
+}
+
+.react-aria-NumberField .react-aria-Group[data-focus-within]::after {
+  outline: 2px solid var(--accent);
+}
+
+.react-aria-NumberField .react-aria-Input {
+  z-index: 1;
+  outline: none;
+  width: 5.25rem;
+  flex: 1;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+  border-inline-end: none;
+}
+
+.react-aria-NumberField .react-aria-Input:focus,
+.react-aria-NumberField .react-aria-Input[data-focused] {
+  outline: none;
+}
+
+.react-aria-NumberField .button {
+  padding: 0;
+  width: 36px;
+  min-width: 36px;
+  margin-inline-start: -1px;
+}
+
+.react-aria-NumberField .button[slot='decrement'] {
+  border-radius: 0;
+}
+
+.react-aria-NumberField .button[slot='increment'] {
+  border-radius: 8px;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}

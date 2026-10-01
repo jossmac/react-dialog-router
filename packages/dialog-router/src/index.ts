@@ -15,5 +15,5 @@ export type {
   ViewTransitionKeys,
 } from './useDialogRouter';
 
-export { DialogMemoryRouter } from './core';
-export type { ViewMap, ViewState, Snapshot, ViewArgs, NavigateOptions } from './core';
+export { MemoryRouter } from './core';
+export type { ViewMap, ViewState, Snapshot, ViewArgs, BackToArgs, NavigateOptions } from './core';

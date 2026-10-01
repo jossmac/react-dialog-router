@@ -1,0 +1,140 @@
+.react-aria-ListBox {
+  max-height: inherit;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  outline: none;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-strong);
+  padding: 4px;
+}
+
+.react-aria-ListBox[data-focus-visible] {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.react-aria-ListBox[data-empty] {
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+  color: var(--text);
+  padding: 12px;
+}
+
+.react-aria-ListBoxItem {
+  padding: 6px 12px;
+  border-radius: 6px;
+  outline: none;
+  cursor: default;
+  color: var(--text-strong);
+  font: inherit;
+  font-size: 15px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 36px;
+  box-sizing: border-box;
+}
+
+.react-aria-ListBoxItem:hover,
+.react-aria-ListBoxItem[data-hovered],
+.react-aria-ListBoxItem[data-focused] {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.react-aria-ListBoxItem[data-focus-visible] {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.react-aria-ListBoxItem[data-selected] {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.react-aria-ListBoxItem[data-selected][data-focus-visible] {
+  outline-color: var(--bg);
+}
+
+.react-aria-ListBoxItem[data-disabled] {
+  opacity: 0.5;
+}
+
+.react-aria-ListBoxItem [slot='label'] {
+  font-weight: 500;
+}
+
+.react-aria-ListBoxItem [slot='description'] {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.dropdown-listbox {
+  display: block;
+  max-height: inherit;
+  overflow: auto;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  outline: none;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-strong);
+  padding: 4px;
+}
+
+.dropdown-listbox[data-empty] {
+  min-height: 36px;
+  padding: 8px;
+}
+
+.dropdown-item {
+  padding: 6px 12px 6px 28px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  outline: none;
+  cursor: default;
+  color: var(--text-strong);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 36px;
+}
+
+.dropdown-item:hover,
+.dropdown-item[data-hovered],
+.dropdown-item[data-focused] {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.dropdown-item[data-selected] {
+  font-weight: 500;
+  color: var(--text-strong);
+  background: transparent;
+}
+
+.dropdown-item[data-selected] .dropdown-check {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  translate: 0 -50%;
+}
+
+.dropdown-item[data-focus-visible] {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.dropdown-item[data-disabled] {
+  opacity: 0.5;
+}

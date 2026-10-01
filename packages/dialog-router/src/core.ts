@@ -3,9 +3,8 @@ import { isPlainObject } from '@jossmac/lil-libs/object';
 export type ViewMap = Record<string, unknown>;
 
 export type ViewState<T extends ViewMap, K extends keyof T = keyof T> = {
-  view: K;
-  params?: T[K];
-};
+  [P in K]: undefined extends T[P] ? { view: P; params?: T[P] } : { view: P; params: T[P] };
+}[K];
 
 export type Snapshot<T extends ViewMap> = {
   current: ViewState<T>;
@@ -16,6 +15,11 @@ export type Snapshot<T extends ViewMap> = {
 export type ViewArgs<T extends ViewMap, K extends keyof T> = T[K] extends undefined | void
   ? [view: K]
   : [view: K, params: T[K]];
+
+/** Like ViewArgs, but params are optional — omit to keep the matched entry's params. */
+export type BackToArgs<T extends ViewMap, K extends keyof T> = T[K] extends undefined | void
+  ? [view: K]
+  : [view: K, params?: T[K]];
 
 export type NavigateOptions = {
   /**
@@ -42,7 +46,7 @@ const DEFAULT_NAVIGATE_OPTIONS: NavigateOptions = {
   transition: true,
 };
 
-export class DialogMemoryRouter<T extends ViewMap> {
+export class MemoryRouter<T extends ViewMap> {
   private initialStack: ViewState<T>[];
   private stack: ViewState<T>[];
   private listeners = new Set<(snapshot: Snapshot<T>) => void>();
@@ -105,13 +109,17 @@ export class DialogMemoryRouter<T extends ViewMap> {
     }
   }
 
-  // Pops back to the first matching target view in the history stack
-  backTo(targetView: keyof T): void {
+  // Pops back to the last matching target view; optionally replaces its params
+  backTo<K extends keyof T>(...args: BackToArgs<T, K>): void {
+    const [targetView, params] = args;
     const index = this.stack.findLastIndex((s) => s.view === targetView);
-    if (index !== -1 && index !== this.stack.length - 1) {
-      this.stack = this.stack.slice(0, index + 1);
-      this.notify();
+    if (index === -1 || index === this.stack.length - 1) return;
+
+    this.stack = this.stack.slice(0, index + 1);
+    if (args.length === 2) {
+      this.stack[index] = { view: targetView, params } as ViewState<T>;
     }
+    this.notify();
   }
 
   // Truncates back to the root or resets to a specified view state

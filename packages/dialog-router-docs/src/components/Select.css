@@ -1,0 +1,50 @@
+.react-aria-Select {
+  color: var(--text);
+  position: relative;
+  min-width: 120px;
+}
+
+.react-aria-Select .button {
+  width: 100%;
+  min-width: 0;
+  justify-content: space-between;
+  padding-inline: 12px 10px;
+  font-weight: 400;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-strong);
+}
+
+.react-aria-Select .button:enabled:hover,
+.react-aria-Select .button[data-hovered] {
+  background: var(--bg-elevated);
+  opacity: 0.95;
+}
+
+.react-aria-Select .react-aria-SelectValue {
+  flex: 1;
+  text-align: start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.react-aria-Select .react-aria-SelectValue[data-placeholder] {
+  color: var(--text);
+  opacity: 0.7;
+  font-weight: normal;
+}
+
+.react-aria-Select .react-aria-SelectValue [slot='description'] {
+  display: none;
+}
+
+.react-aria-Select .select-chevron {
+  margin-inline-start: 8px;
+  flex-shrink: 0;
+}
+
+.select-popover[data-trigger='Select'] {
+  width: var(--trigger-width);
+  padding: 0;
+}
