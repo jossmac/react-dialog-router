@@ -4,10 +4,7 @@ import type { SomeOptional } from '@jossmac/lil-libs/types';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Heading } from 'react-aria-components/Heading';
 
-import type {
-  DialogRouterState,
-  EscapeKeyBehavior,
-} from '@jossmac/dialog-router';
+import type { DialogRouterState, EscapeKeyBehavior } from '@jossmac/dialog-router';
 import { DialogRouterView, useDialogRouter } from '@jossmac/dialog-router';
 
 import { Button } from './Button';
@@ -35,13 +32,9 @@ export const Default: Story = {
 
     return (
       <>
-        <Button onPress={() => document.querySelector('dialog')?.showModal()}>
-          Open
-        </Button>
+        <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
         <NativeDialog
-          onCancel={(event) =>
-            handleNativeEscape(event, router.escapeAction, router.back)
-          }
+          onCancel={(event) => handleNativeEscape(event, router.escapeAction, router.back)}
         >
           <DialogView
             key={router.current.key}
@@ -65,13 +58,9 @@ export const AnimateViewsVT: Story = {
 
     return (
       <>
-        <Button onPress={() => document.querySelector('dialog')?.showModal()}>
-          Open
-        </Button>
+        <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
         <NativeDialog
-          onCancel={(event) =>
-            handleNativeEscape(event, router.escapeAction, router.back)
-          }
+          onCancel={(event) => handleNativeEscape(event, router.escapeAction, router.back)}
         >
           <DialogView
             key={router.current.key}
@@ -98,13 +87,9 @@ export const AnimateDiscreteViewsVT: Story = {
 
     return (
       <>
-        <Button onPress={() => document.querySelector('dialog')?.showModal()}>
-          Open
-        </Button>
+        <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
         <NativeDialog
-          onCancel={(event) =>
-            handleNativeEscape(event, router.escapeAction, router.back)
-          }
+          onCancel={(event) => handleNativeEscape(event, router.escapeAction, router.back)}
         >
           <DialogRouterView
             key={router.current.key}
@@ -182,19 +167,14 @@ type FormViews = {
 };
 export const Forms: Story = {
   render: function RenderForms() {
-    const { back, backTo, current, escapeAction, push, stack } =
-      useDialogRouter<FormViews>({
-        initial: [{ view: 'root' }],
-      });
+    const { back, backTo, current, escapeAction, push, stack } = useDialogRouter<FormViews>({
+      initial: [{ view: 'root' }],
+    });
 
     return (
       <>
-        <Button onPress={() => document.querySelector('dialog')?.showModal()}>
-          Open
-        </Button>
-        <NativeDialog
-          onCancel={(event) => handleNativeEscape(event, escapeAction, back)}
-        >
+        <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
+        <NativeDialog onCancel={(event) => handleNativeEscape(event, escapeAction, back)}>
           {current.view === 'root' && (
             <DialogView
               key={current.key}
@@ -218,9 +198,7 @@ export const Forms: Story = {
                   }
                 }}
               >
-                {(item) => (
-                  <ListBoxItem key={item.id}>{item.label}</ListBoxItem>
-                )}
+                {(item) => <ListBoxItem key={item.id}>{item.label}</ListBoxItem>}
               </ListBox>
             </DialogView>
           )}
@@ -234,9 +212,7 @@ export const Forms: Story = {
             >
               <Form
                 action={(formData) => {
-                  const selection = formData.get('selection') as
-                    | Fruit
-                    | Vegetable;
+                  const selection = formData.get('selection') as Fruit | Vegetable;
                   const count = Number(formData.get('count')) || 1;
                   push('summary', {
                     count,
@@ -250,17 +226,13 @@ export const Forms: Story = {
                   isRequired
                   name="selection"
                   label={current.params.type}
-                  defaultValue={
-                    current.params.selection ?? TYPES[current.params.type][0]
-                  }
+                  defaultValue={current.params.selection ?? TYPES[current.params.type][0]}
                   items={TYPES[current.params.type].map((item) => ({
                     id: item,
                     label: item,
                   }))}
                 >
-                  {(item) => (
-                    <SelectItem key={item.id}>{item.label}</SelectItem>
-                  )}
+                  {(item) => <SelectItem key={item.id}>{item.label}</SelectItem>}
                 </Select>
                 <NumberField
                   label="Count"
@@ -289,15 +261,11 @@ export const Forms: Story = {
             >
               <div>
                 <p>
-                  You have selected{' '}
-                  {pluralize(current.params.count, current.params.selection)}.
+                  You have selected {pluralize(current.params.count, current.params.selection)}.
                 </p>
               </div>
               <div className="dialog-actions">
-                <Button
-                  variant="secondary"
-                  onPress={() => backTo('form', current.params)}
-                >
+                <Button variant="secondary" onPress={() => backTo('form', current.params)}>
                   Back
                 </Button>
                 <Button slot="close">Confirm</Button>
@@ -347,8 +315,7 @@ function DialogView(props: {
   includeViewTransition?: boolean;
   title: string;
 }) {
-  const { children, escapeAction, shouldFocus, includeViewTransition, title } =
-    props;
+  const { children, escapeAction, shouldFocus, includeViewTransition, title } = props;
   const headingId = useId();
   const content = (
     <DialogRouterView
@@ -399,10 +366,7 @@ function Actions(props: DialogRouterState<Views> & StyleProps) {
       <Button isDisabled={!canGoBack} variant="secondary" onPress={back}>
         Back
       </Button>
-      <Button
-        isDisabled={!view.next}
-        onPress={view.next ? () => push(view.next) : undefined}
-      >
+      <Button isDisabled={!view.next} onPress={view.next ? () => push(view.next) : undefined}>
         Next
       </Button>
     </div>

@@ -1,19 +1,7 @@
 'use client';
 
-import {
-  addTransitionType,
-  startTransition,
-  useCallback,
-  useReducer,
-} from 'react';
-import type {
-  BackToArgs,
-  NavigationAction,
-  Snapshot,
-  ViewArgs,
-  ViewMap,
-  ViewState,
-} from './core';
+import { addTransitionType, startTransition, useCallback, useReducer } from 'react';
+import type { NavigationAction, Snapshot, ViewArgs, ViewMap, ViewState } from './core';
 import { createRouterState, createSnapshot, routerReducer } from './core';
 
 const DEFAULT_VIEW_TRANSITIONS: Record<NavigationAction, string | false> = {
@@ -80,27 +68,16 @@ function resolveType(
   return viewTransitions[action];
 }
 
-export type DialogRouterState<T extends ViewMap> = ReturnType<
-  typeof useDialogRouter<T>
->;
+export type DialogRouterState<T extends ViewMap> = ReturnType<typeof useDialogRouter<T>>;
 
-export function useDialogRouter<T extends ViewMap>(
-  options: DialogRouterOptions<T>,
-) {
+export function useDialogRouter<T extends ViewMap>(options: DialogRouterOptions<T>) {
   const { viewTransitions = DEFAULT_VIEW_TRANSITIONS } = options;
 
-  const [state, dispatch] = useReducer(
-    routerReducer<T>,
-    options.initial,
-    createRouterState,
-  );
+  const [state, dispatch] = useReducer(routerReducer<T>, options.initial, createRouterState);
   const snapshot = createSnapshot(state.stack);
 
   const commit = useCallback(
-    (
-      action: Parameters<typeof dispatch>[0],
-      transitionAction: NavigationAction,
-    ) => {
+    (action: Parameters<typeof dispatch>[0], transitionAction: NavigationAction) => {
       const transitionType = resolveType(viewTransitions, transitionAction);
       if (transitionType) {
         startTransition(() => {
@@ -115,8 +92,7 @@ export function useDialogRouter<T extends ViewMap>(
   );
 
   const canGoBack = options.allowBack?.(snapshot) ?? snapshot.length > 1;
-  const escapeAction =
-    options.escapeBehavior?.(snapshot) ?? (canGoBack ? 'back' : 'dismiss');
+  const escapeAction = options.escapeBehavior?.(snapshot) ?? (canGoBack ? 'back' : 'dismiss');
 
   const push = useCallback(
     <K extends keyof T>(...args: ViewArgs<T, K>) => {
@@ -139,7 +115,7 @@ export function useDialogRouter<T extends ViewMap>(
   }, [commit]);
 
   const backTo = useCallback(
-    <K extends keyof T>(...args: BackToArgs<T, K>) => {
+    <K extends keyof T>(...args: ViewArgs<T, K>) => {
       const [view, params] = args;
       commit({ type: 'backTo', view, params }, 'backTo');
     },

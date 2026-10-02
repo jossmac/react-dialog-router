@@ -20,11 +20,6 @@ export type ViewArgs<T extends ViewMap, K extends keyof T> = T[K] extends undefi
   ? [view: K]
   : [view: K, params: T[K]];
 
-/** Like ViewArgs, but params are optional — omit to keep the matched entry's params. */
-export type BackToArgs<T extends ViewMap, K extends keyof T> = T[K] extends undefined | void
-  ? [view: K]
-  : [view: K, params?: T[K]];
-
 export type RouterState<T extends ViewMap> = {
   /** Pristine seed descriptors — never mutated; used by no-arg `reset`. */
   initial: ViewState<T>[];
@@ -75,13 +70,24 @@ export function routerReducer<T extends ViewMap>(
     case 'push':
       return {
         ...state,
-        stack: [...state.stack, { view: action.view, params: action.params, key: createKey() } as StackEntry<T>],
+        stack: [
+          ...state.stack,
+          {
+            view: action.view,
+            params: action.params,
+            key: createKey(),
+          } as StackEntry<T>,
+        ],
       };
 
     case 'replace': {
       const stack = [...state.stack];
       const { key } = stack[stack.length - 1];
-      stack[stack.length - 1] = { view: action.view, params: action.params, key } as StackEntry<T>;
+      stack[stack.length - 1] = {
+        view: action.view,
+        params: action.params,
+        key,
+      } as StackEntry<T>;
       return { ...state, stack };
     }
 
@@ -97,7 +103,11 @@ export function routerReducer<T extends ViewMap>(
       const stack = state.stack.slice(0, index + 1);
       if (action.params !== undefined) {
         const { key } = stack[index];
-        stack[index] = { view: action.view, params: action.params, key } as StackEntry<T>;
+        stack[index] = {
+          view: action.view,
+          params: action.params,
+          key,
+        } as StackEntry<T>;
       }
       return { ...state, stack };
     }

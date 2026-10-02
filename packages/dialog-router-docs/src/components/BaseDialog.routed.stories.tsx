@@ -53,8 +53,8 @@ function RoutedBaseExample() {
         {current.view === 'home' && (
           <DialogView title="Settings" router={router}>
             <p className="dialog-body">
-              Choose an item to review. Escape dismisses; navigating deeper
-              changes Escape to go back.
+              Choose an item to review. Escape dismisses; navigating deeper changes Escape to go
+              back.
             </p>
             <div className="dialog-actions">
               <Dialog.Close className="button" data-variant="secondary">
@@ -72,10 +72,7 @@ function RoutedBaseExample() {
           </DialogView>
         )}
         {current.view === 'details' && (
-          <DetailsView
-            router={router}
-            onContinue={(itemId) => push('confirm', { itemId })}
-          />
+          <DetailsView router={router} onContinue={(itemId) => push('confirm', { itemId })} />
         )}
         {current.view === 'confirm' && <ConfirmView router={router} />}
       </BaseDialog>
@@ -100,12 +97,7 @@ function DetailsView({
       </p>
       <div className="dialog-actions">
         {canGoBack && (
-          <button
-            type="button"
-            className="button"
-            data-variant="secondary"
-            onClick={back}
-          >
+          <button type="button" className="button" data-variant="secondary" onClick={back}>
             Back
           </button>
         )}
@@ -139,12 +131,7 @@ function ConfirmView({ router }: { router: DialogRouterState<Views> }) {
           Back to start
         </button>
         {canGoBack && (
-          <button
-            type="button"
-            className="button"
-            data-variant="secondary"
-            onClick={back}
-          >
+          <button type="button" className="button" data-variant="secondary" onClick={back}>
             Back
           </button>
         )}

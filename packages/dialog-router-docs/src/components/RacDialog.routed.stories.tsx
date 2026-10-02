@@ -2,10 +2,7 @@ import { ViewTransition, useEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Heading } from 'react-aria-components/Heading';
 
-import type {
-  DialogRouterState,
-  EscapeKeyBehavior,
-} from '@jossmac/dialog-router';
+import type { DialogRouterState, EscapeKeyBehavior } from '@jossmac/dialog-router';
 import { DialogRouterView, useDialogRouter } from '@jossmac/dialog-router';
 import { ensure } from '@jossmac/lil-libs/assert';
 import { DialogTrigger } from 'react-aria-components';
@@ -40,10 +37,7 @@ type Views = {
 
 function RoutedRacExample() {
   const router = useDialogRouter<Views>({
-    initial: [
-      { view: 'home' },
-      { view: 'details', params: { itemId: 'widget-42' } },
-    ],
+    initial: [{ view: 'home' }, { view: 'details', params: { itemId: 'widget-42' } }],
   });
   const { current, escapeAction, push, back } = router;
 
@@ -57,26 +51,18 @@ function RoutedRacExample() {
       {current.view === 'home' && (
         <DialogView title="Settings" router={router}>
           <p className="dialog-body">
-            Choose an item to review. Escape dismisses; navigating deeper
-            changes Escape to go back.
+            Choose an item to review. Escape dismisses; navigating deeper changes Escape to go back.
           </p>
           <div className="dialog-actions">
             <Button variant="secondary">Close</Button>
-            <Button onPress={() => push('details', { itemId: 'widget-42' })}>
-              View details
-            </Button>
+            <Button onPress={() => push('details', { itemId: 'widget-42' })}>View details</Button>
           </div>
         </DialogView>
       )}
       {current.view === 'details' && (
-        <DetailsView
-          router={router}
-          onContinue={(itemId) => push('confirm', { itemId })}
-        />
+        <DetailsView router={router} onContinue={(itemId) => push('confirm', { itemId })} />
       )}
-      {current.view === 'confirm' && (
-        <ConfirmView router={router} onDone={() => {}} />
-      )}
+      {current.view === 'confirm' && <ConfirmView router={router} onDone={() => {}} />}
     </RacDialog>
   );
 }
@@ -108,13 +94,7 @@ function DetailsView({
   );
 }
 
-function ConfirmView({
-  router,
-  onDone,
-}: {
-  router: DialogRouterState<Views>;
-  onDone: () => void;
-}) {
+function ConfirmView({ router, onDone }: { router: DialogRouterState<Views>; onDone: () => void }) {
   const { canGoBack, back, current } = router;
   return (
     <DialogView title="Confirm" router={router}>

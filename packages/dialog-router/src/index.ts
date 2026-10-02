@@ -9,12 +9,4 @@ export type {
   ViewTransitionTypes,
 } from './useDialogRouter';
 
-export type {
-  ViewMap,
-  ViewState,
-  StackEntry,
-  Snapshot,
-  NavigationAction,
-  ViewArgs,
-  BackToArgs,
-} from './core';
+export type { NavigationAction, Snapshot, StackEntry, ViewArgs, ViewMap, ViewState } from './core';
