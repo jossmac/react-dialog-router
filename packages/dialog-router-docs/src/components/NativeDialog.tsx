@@ -1,9 +1,9 @@
-import type { HTMLProps, ReactNode } from 'react';
+import type { DialogHTMLAttributes, ReactNode } from 'react';
 import { useId, useRef } from 'react';
 // import './NativeDialog.css';
 import { Button } from './Button';
 
-export type NativeDialogProps = HTMLProps<HTMLDialogElement> & {
+export type NativeDialogProps = DialogHTMLAttributes<HTMLDialogElement> & {
   title?: ReactNode;
 };
 

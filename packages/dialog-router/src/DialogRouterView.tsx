@@ -1,13 +1,13 @@
 'use client';
 
 import type { CSSProperties, HTMLAttributes, Ref } from 'react';
-import { use, useEffect, useId, useRef } from 'react';
-
-import { mergeRefs } from './mergeRefs';
-import { DialogRouterContext } from './context';
+import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
-const DESICRIPTION_TEXT = {
+import { mergeRefs } from './mergeRefs';
+import type { EscapeKeyBehavior } from './useDialogRouter';
+
+const DESCRIPTION_TEXT = {
   dismiss: 'Escape to dismiss.',
   back: 'Escape to go back.',
 } as const;
@@ -27,15 +27,19 @@ const visuallyHiddenStyles: CSSProperties = {
 
 export type DialogRouterViewProps = {
   ref?: Ref<HTMLDivElement>;
+  /** Current Escape policy from `useDialogRouter`. When `null`, no description is announced. */
+  escapeAction: EscapeKeyBehavior;
+  /** Focus this region after mount when true (typically `stack.length > 1`). */
+  shouldFocus?: boolean;
 } & HTMLAttributes<HTMLDivElement>;
 
 export function DialogRouterView(props: DialogRouterViewProps) {
-  const { children, ref, ...otherProps } = props;
+  const { children, ref, escapeAction, shouldFocus = false, ...otherProps } = props;
 
   const descriptionId = useId();
   const hasWarned = useRef(false);
   const localRef = useRef<HTMLDivElement>(null);
-  const { stack, escapeAction } = use(DialogRouterContext)!;
+  const descriptionText = escapeAction != null ? DESCRIPTION_TEXT[escapeAction] : null;
 
   useEffect(function checkAriaProps() {
     if (process.env.NODE_ENV !== 'production' && !hasWarned.current && localRef.current) {
@@ -51,30 +55,34 @@ export function DialogRouterView(props: DialogRouterViewProps) {
     }
   });
 
-  useEffect(function focusOnNavigated() {
-    if (localRef.current && stack.length > 1) {
+  useEffect(
+    function focusOnNavigated() {
+      if (!shouldFocus || !localRef.current) return;
       requestAnimationFrame(() => {
         localRef.current?.focus({ preventScroll: true });
       });
-    }
-  });
+    },
+    [shouldFocus],
+  );
 
   return (
     <div
       role="region"
       ref={mergeRefs(localRef, ref)}
       tabIndex={-1}
-      aria-describedby={descriptionId}
+      aria-describedby={descriptionText ? descriptionId : undefined}
       {...otherProps}
     >
       {children}
       {/* TODO: localize description text. */}
-      {createPortal(
-        <span id={descriptionId} style={visuallyHiddenStyles}>
-          {DESICRIPTION_TEXT[escapeAction]}
-        </span>,
-        document.body,
-      )}
+      {descriptionText
+        ? createPortal(
+            <span id={descriptionId} style={visuallyHiddenStyles}>
+              {descriptionText}
+            </span>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

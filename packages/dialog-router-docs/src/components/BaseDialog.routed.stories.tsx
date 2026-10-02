@@ -1,9 +1,9 @@
-import { ViewTransition, use } from 'react';
+import { ViewTransition } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Dialog } from '@base-ui/react/dialog';
 
 import type { DialogRouterState } from '@jossmac/dialog-router';
-import { DialogRouter, DialogRouterContext, DialogRouterView } from '@jossmac/dialog-router';
+import { DialogRouterView, useDialogRouter } from '@jossmac/dialog-router';
 import { ensure } from '@jossmac/lil-libs/assert';
 
 import { BaseDialog } from './BaseDialog';
@@ -29,65 +29,83 @@ type Views = {
 };
 
 function RoutedBaseExample() {
+  const router = useDialogRouter<Views>({ initial: [{ view: 'home' }] });
+  const { current, escapeAction, push, back } = router;
+
   return (
-    <DialogRouter<Views> initial={[{ view: 'home' }]}>
-      {({ current, escapeAction, navigate }) => (
-        <Dialog.Root
-          disablePointerDismissal={current.view === 'confirm'}
-          onOpenChange={(open, details) => {
-            if (!open && details.reason === 'escape-key' && escapeAction !== 'dismiss') {
-              details.cancel();
-            }
-          }}
-        >
-          <Dialog.Trigger className="button" data-variant="primary">
-            Open
-          </Dialog.Trigger>
-          <BaseDialog isDismissable={current.view !== 'confirm'}>
-            {current.view === 'home' && (
-              <DialogView title="Settings">
-                <p className="dialog-body">
-                  Choose an item to review. Escape dismisses; navigating deeper changes Escape to go
-                  back.
-                </p>
-                <div className="dialog-actions">
-                  <Dialog.Close className="button" data-variant="secondary">
-                    Close
-                  </Dialog.Close>
-                  <button
-                    type="button"
-                    className="button"
-                    data-variant="primary"
-                    onClick={() => navigate('details', { itemId: 'widget-42' })}
-                  >
-                    View details
-                  </button>
-                </div>
-              </DialogView>
-            )}
-            {current.view === 'details' && (
-              <DetailsView onContinue={(itemId) => navigate('confirm', { itemId })} />
-            )}
-            {current.view === 'confirm' && <ConfirmView />}
-          </BaseDialog>
-        </Dialog.Root>
-      )}
-    </DialogRouter>
+    <Dialog.Root
+      disablePointerDismissal={current.view === 'confirm'}
+      onOpenChange={(open, details) => {
+        if (!open && details.reason === 'escape-key') {
+          if (escapeAction === 'back') {
+            details.cancel();
+            back();
+          } else if (escapeAction === null) {
+            details.cancel();
+          }
+        }
+      }}
+    >
+      <Dialog.Trigger className="button" data-variant="primary">
+        Open
+      </Dialog.Trigger>
+      <BaseDialog isDismissable={current.view !== 'confirm'}>
+        {current.view === 'home' && (
+          <DialogView title="Settings" router={router}>
+            <p className="dialog-body">
+              Choose an item to review. Escape dismisses; navigating deeper
+              changes Escape to go back.
+            </p>
+            <div className="dialog-actions">
+              <Dialog.Close className="button" data-variant="secondary">
+                Close
+              </Dialog.Close>
+              <button
+                type="button"
+                className="button"
+                data-variant="primary"
+                onClick={() => push('details', { itemId: 'widget-42' })}
+              >
+                View details
+              </button>
+            </div>
+          </DialogView>
+        )}
+        {current.view === 'details' && (
+          <DetailsView
+            router={router}
+            onContinue={(itemId) => push('confirm', { itemId })}
+          />
+        )}
+        {current.view === 'confirm' && <ConfirmView router={router} />}
+      </BaseDialog>
+    </Dialog.Root>
   );
 }
 
-function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
-  const { isBackAllowed, back, current } = useRouteContext();
+function DetailsView({
+  router,
+  onContinue,
+}: {
+  router: DialogRouterState<Views>;
+  onContinue: (itemId: string) => void;
+}) {
+  const { canGoBack, back, current } = router;
   const itemId = ensure(current.params?.itemId, 'itemId is required');
 
   return (
-    <DialogView title="Details">
+    <DialogView title="Details" router={router}>
       <p className="dialog-body">
         Reviewing <code>{itemId}</code>. You can go back or continue to confirm.
       </p>
       <div className="dialog-actions">
-        {isBackAllowed && (
-          <button type="button" className="button" data-variant="secondary" onClick={back}>
+        {canGoBack && (
+          <button
+            type="button"
+            className="button"
+            data-variant="secondary"
+            onClick={back}
+          >
             Back
           </button>
         )}
@@ -104,10 +122,10 @@ function DetailsView({ onContinue }: { onContinue: (itemId: string) => void }) {
   );
 }
 
-function ConfirmView() {
-  const { isBackAllowed, back, backTo, current } = useRouteContext();
+function ConfirmView({ router }: { router: DialogRouterState<Views> }) {
+  const { canGoBack, back, backTo, current } = router;
   return (
-    <DialogView title="Confirm">
+    <DialogView title="Confirm" router={router}>
       <p className="dialog-body">
         Confirm changes for <code>{current.params?.itemId}</code>?
       </p>
@@ -120,8 +138,13 @@ function ConfirmView() {
         >
           Back to start
         </button>
-        {isBackAllowed && (
-          <button type="button" className="button" data-variant="secondary" onClick={back}>
+        {canGoBack && (
+          <button
+            type="button"
+            className="button"
+            data-variant="secondary"
+            onClick={back}
+          >
             Back
           </button>
         )}
@@ -130,19 +153,23 @@ function ConfirmView() {
   );
 }
 
-function DialogView(props: { children: React.ReactNode; title: string }) {
-  const { current } = useRouteContext();
+function DialogView(props: {
+  children: React.ReactNode;
+  title: string;
+  router: DialogRouterState<Views>;
+}) {
+  const { current, escapeAction, stack } = props.router;
   return (
     <ViewTransition key={current.key} name="slide-x">
-      <DialogRouterView className="dialog-view" aria-label={props.title}>
+      <DialogRouterView
+        className="dialog-view"
+        aria-label={props.title}
+        escapeAction={escapeAction}
+        shouldFocus={stack.length > 1}
+      >
         <Dialog.Title className="dialog-title">{props.title}</Dialog.Title>
         {props.children}
       </DialogRouterView>
     </ViewTransition>
   );
-}
-
-function useRouteContext() {
-  const ctx = ensure(use(DialogRouterContext), 'DialogRouterContext not found');
-  return ctx as DialogRouterState<Views>;
 }

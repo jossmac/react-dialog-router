@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-import { MemoryRouter } from './core';
+import { describe, expect, it } from 'vitest';
+import { createRouterState, createSnapshot, routerReducer } from './core';
 
 type Views = {
   home: undefined;
@@ -7,26 +7,26 @@ type Views = {
   confirm: { itemId: string };
 };
 
-function createRouter() {
-  return new MemoryRouter<Views>([{ view: 'home' }]);
+function createState() {
+  return createRouterState<Views>([{ view: 'home' }]);
 }
 
-describe('MemoryRouter', () => {
+describe('routerReducer', () => {
   it('stamps keys on the initial stack', () => {
-    const router = createRouter();
-    const { current, stack } = router.getSnapshot();
+    const state = createState();
+    const { current, stack } = createSnapshot(state.stack);
     expect(current.key).toEqual(expect.any(String));
     expect(stack).toHaveLength(1);
     expect(stack[0].key).toBe(current.key);
   });
 
-  it('assigns a new key on navigate (push)', () => {
-    const router = createRouter();
-    const rootKey = router.getSnapshot().current.key;
+  it('assigns a new key on push', () => {
+    const state = createState();
+    const rootKey = state.stack[0].key;
 
-    router.navigate('details', { itemId: 'a' });
+    const next = routerReducer(state, { type: 'push', view: 'details', params: { itemId: 'a' } });
+    const snap = createSnapshot(next.stack);
 
-    const snap = router.getSnapshot();
     expect(snap.length).toBe(2);
     expect(snap.current.view).toBe('details');
     expect(snap.current.key).not.toBe(rootKey);
@@ -34,102 +34,81 @@ describe('MemoryRouter', () => {
   });
 
   it('preserves the key on replace', () => {
-    const router = createRouter();
-    router.navigate('details', { itemId: 'a' });
-    const keyBefore = router.getSnapshot().current.key;
+    let state = createState();
+    state = routerReducer(state, { type: 'push', view: 'details', params: { itemId: 'a' } });
+    const keyBefore = state.stack[state.stack.length - 1].key;
 
-    router.replace('details', { itemId: 'b' });
+    state = routerReducer(state, { type: 'replace', view: 'details', params: { itemId: 'b' } });
+    const snap = createSnapshot(state.stack);
 
-    const snap = router.getSnapshot();
     expect(snap.length).toBe(2);
     expect(snap.current.params).toEqual({ itemId: 'b' });
     expect(snap.current.key).toBe(keyBefore);
   });
 
   it('does not mutate the initial seed when navigating', () => {
-    const router = createRouter();
-    router.navigate('details', { itemId: 'a' });
-    router.navigate('confirm', { itemId: 'a' });
-    expect(router.getSnapshot().length).toBe(3);
+    let state = createState();
+    state = routerReducer(state, { type: 'push', view: 'details', params: { itemId: 'a' } });
+    state = routerReducer(state, { type: 'push', view: 'confirm', params: { itemId: 'a' } });
+    expect(state.stack).toHaveLength(3);
 
-    router.reset();
+    state = routerReducer(state, { type: 'reset' });
 
-    expect(router.getSnapshot().length).toBe(1);
-    expect(router.getSnapshot().current.view).toBe('home');
+    expect(state.stack).toHaveLength(1);
+    expect(state.stack[0].view).toBe('home');
+    expect(state.initial).toEqual([{ view: 'home' }]);
   });
 
   it('re-keys on no-arg reset', () => {
-    const router = createRouter();
-    const originalKey = router.getSnapshot().current.key;
-    router.navigate('details', { itemId: 'a' });
+    let state = createState();
+    const originalKey = state.stack[0].key;
+    state = routerReducer(state, { type: 'push', view: 'details', params: { itemId: 'a' } });
 
-    router.reset();
+    state = routerReducer(state, { type: 'reset' });
 
-    expect(router.getSnapshot().current.key).not.toBe(originalKey);
-    expect(router.getSnapshot().current.view).toBe('home');
+    expect(state.stack[0].key).not.toBe(originalKey);
+    expect(state.stack[0].view).toBe('home');
   });
 
-  it('assigns fresh keys on reset(...views)', () => {
-    const router = createRouter();
-    const originalKey = router.getSnapshot().current.key;
+  it('assigns fresh keys on reset with views', () => {
+    let state = createState();
+    const originalKey = state.stack[0].key;
 
-    router.reset({ view: 'details', params: { itemId: 'z' } });
+    state = routerReducer(state, {
+      type: 'reset',
+      views: [{ view: 'details', params: { itemId: 'z' } }],
+    });
 
-    const snap = router.getSnapshot();
+    const snap = createSnapshot(state.stack);
     expect(snap.length).toBe(1);
     expect(snap.current.view).toBe('details');
     expect(snap.current.key).not.toBe(originalKey);
   });
 
   it('preserves the matched entry key on backTo with params', () => {
-    const router = createRouter();
-    router.navigate('details', { itemId: 'a' });
-    const detailsKey = router.getSnapshot().current.key;
-    router.navigate('confirm', { itemId: 'a' });
+    let state = createState();
+    state = routerReducer(state, { type: 'push', view: 'details', params: { itemId: 'a' } });
+    const detailsKey = state.stack[state.stack.length - 1].key;
+    state = routerReducer(state, { type: 'push', view: 'confirm', params: { itemId: 'a' } });
 
-    router.backTo('details', { itemId: 'updated' });
+    state = routerReducer(state, {
+      type: 'backTo',
+      view: 'details',
+      params: { itemId: 'updated' },
+    });
 
-    const snap = router.getSnapshot();
+    const snap = createSnapshot(state.stack);
     expect(snap.length).toBe(2);
     expect(snap.current.view).toBe('details');
     expect(snap.current.params).toEqual({ itemId: 'updated' });
     expect(snap.current.key).toBe(detailsKey);
   });
 
-  it('notifies subscribers with action types', () => {
-    const router = createRouter();
-    const listener = vi.fn();
-    router.subscribe(listener);
+  it('returns the same state reference on no-op back or backTo', () => {
+    const state = createState();
 
-    router.navigate('details', { itemId: 'a' });
-    expect(listener).toHaveBeenLastCalledWith(
-      expect.objectContaining({ action: 'push', snapshot: router.getSnapshot() }),
-    );
-
-    router.replace('details', { itemId: 'b' });
-    expect(listener).toHaveBeenLastCalledWith(expect.objectContaining({ action: 'replace' }));
-
-    router.navigate('confirm', { itemId: 'b' });
-    router.back();
-    expect(listener).toHaveBeenLastCalledWith(expect.objectContaining({ action: 'back' }));
-
-    router.navigate('confirm', { itemId: 'b' });
-    router.backTo('home');
-    expect(listener).toHaveBeenLastCalledWith(expect.objectContaining({ action: 'backTo' }));
-
-    router.reset();
-    expect(listener).toHaveBeenLastCalledWith(expect.objectContaining({ action: 'reset' }));
-  });
-
-  it('does not notify on no-op back or backTo', () => {
-    const router = createRouter();
-    const listener = vi.fn();
-    router.subscribe(listener);
-
-    router.back();
-    router.backTo('home');
-    router.backTo('details');
-
-    expect(listener).not.toHaveBeenCalled();
+    expect(routerReducer(state, { type: 'back' })).toBe(state);
+    expect(routerReducer(state, { type: 'backTo', view: 'home' })).toBe(state);
+    expect(routerReducer(state, { type: 'backTo', view: 'details' })).toBe(state);
   });
 });

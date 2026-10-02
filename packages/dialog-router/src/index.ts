@@ -1,8 +1,3 @@
-export { DialogRouterContext } from './context';
-
-export { DialogRouter } from './DialogRouter';
-export type { DialogRouterProps } from './DialogRouter';
-
 export { DialogRouterView } from './DialogRouterView';
 export type { DialogRouterViewProps } from './DialogRouterView';
 
@@ -12,17 +7,14 @@ export type {
   DialogRouterState,
   EscapeKeyBehavior,
   ViewTransitionTypes,
-  ViewTransitionKeys,
 } from './useDialogRouter';
 
-export { MemoryRouter } from './core';
 export type {
   ViewMap,
   ViewState,
   StackEntry,
   Snapshot,
   NavigationAction,
-  NavigationEvent,
   ViewArgs,
   BackToArgs,
 } from './core';
