@@ -4,7 +4,10 @@ dialog {
   opacity: 0;
   scale: 0.92;
   transition: all 240ms var(--ease-out-smooth);
+  transition-property: display, opacity, overlay, scale;
   transition-behavior: allow-discrete;
+  position: fixed;
+  inset: 0;
 
   &[open] {
     opacity: 1;

@@ -34,8 +34,12 @@ export const Default: Story = {
 
         return (
           <>
-            <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
-            <NativeDialog open>
+            <Button
+              onPress={() => document.querySelector('dialog')?.showModal()}
+            >
+              Open
+            </Button>
+            <NativeDialog>
               <DialogView title={view.title}>
                 <Content {...renderProps} />
                 <Actions {...renderProps} />
@@ -57,8 +61,12 @@ export const AnimateViewsVT: Story = {
 
         return (
           <>
-            <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
-            <NativeDialog open>
+            <Button
+              onPress={() => document.querySelector('dialog')?.showModal()}
+            >
+              Open
+            </Button>
+            <NativeDialog>
               <DialogView title={view.title} includeViewTransition>
                 <Content {...renderProps} />
                 <Actions {...renderProps} />
@@ -84,8 +92,12 @@ export const AnimateDiscreteViewsVT: Story = {
 
           return (
             <>
-              <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
-              <NativeDialog open>
+              <Button
+                onPress={() => document.querySelector('dialog')?.showModal()}
+              >
+                Open
+              </Button>
+              <NativeDialog>
                 <DialogRouterView
                   aria-labelledby={headingId}
                   style={{
@@ -168,7 +180,11 @@ export const Forms: Story = {
 
         return (
           <>
-            <Button onPress={() => document.querySelector('dialog')?.showModal()}>Open</Button>
+            <Button
+              onPress={() => document.querySelector('dialog')?.showModal()}
+            >
+              Open
+            </Button>
             <NativeDialog
             // isDismissable
             // isKeyboardDismissDisabled={escapeAction !== 'dismiss'}
@@ -190,7 +206,9 @@ export const Forms: Story = {
                       }
                     }}
                   >
-                    {(item) => <ListBoxItem key={item.id}>{item.label}</ListBoxItem>}
+                    {(item) => (
+                      <ListBoxItem key={item.id}>{item.label}</ListBoxItem>
+                    )}
                   </ListBox>
                 </DialogView>
               )}
@@ -198,7 +216,9 @@ export const Forms: Story = {
                 <DialogView title="Selection" includeViewTransition>
                   <Form
                     action={(formData) => {
-                      const selection = formData.get('selection') as Fruit | Vegetable;
+                      const selection = formData.get('selection') as
+                        | Fruit
+                        | Vegetable;
                       const count = Number(formData.get('count')) || 1;
                       // if (!selection || count < 1) return;
                       navigate('summary', {
@@ -213,13 +233,18 @@ export const Forms: Story = {
                       isRequired
                       name="selection"
                       label={current.params.type}
-                      defaultValue={current.params.selection ?? TYPES[current.params.type][0]}
+                      defaultValue={
+                        current.params.selection ??
+                        TYPES[current.params.type][0]
+                      }
                       items={TYPES[current.params.type].map((item) => ({
                         id: item,
                         label: item,
                       }))}
                     >
-                      {(item) => <SelectItem key={item.id}>{item.label}</SelectItem>}
+                      {(item) => (
+                        <SelectItem key={item.id}>{item.label}</SelectItem>
+                      )}
                     </Select>
                     <NumberField
                       label="Count"
@@ -242,11 +267,19 @@ export const Forms: Story = {
                 <DialogView title="Summary" includeViewTransition>
                   <div>
                     <p>
-                      You have selected {pluralize(current.params.count, current.params.selection)}.
+                      You have selected{' '}
+                      {pluralize(
+                        current.params.count,
+                        current.params.selection,
+                      )}
+                      .
                     </p>
                   </div>
                   <div className="dialog-actions">
-                    <Button variant="secondary" onPress={() => backTo('form', current.params)}>
+                    <Button
+                      variant="secondary"
+                      onPress={() => backTo('form', current.params)}
+                    >
                       Back
                     </Button>
                     <Button slot="close">Confirm</Button>
@@ -331,7 +364,10 @@ function Actions(props: DialogRouterState<Views> & StyleProps) {
       <Button isDisabled={!isBackAllowed} variant="secondary" onPress={back}>
         Back
       </Button>
-      <Button isDisabled={!view.next} onPress={view.next ? () => navigate(view.next) : undefined}>
+      <Button
+        isDisabled={!view.next}
+        onPress={view.next ? () => navigate(view.next) : undefined}
+      >
         Next
       </Button>
     </div>
